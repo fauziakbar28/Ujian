@@ -8,17 +8,21 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<!-- Library untuk Export DOCX -->
+<script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
   
-  /* ANIMATED BACKGROUND */
+  /* ANIMATED GRADIENT BACKGROUND */
   body {
-    background: linear-gradient(-45deg, #FF6B35, #1E3A8A, #FBBF24, #EC4899, #FF6B35);
+    background: linear-gradient(-45deg, #FF6B35, #1E3A8A, #FBBF24, #EC4899, #FF6B35, #10B981);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
     min-height: 100vh;
     padding: 20px;
+    position: relative;
+    overflow-x: hidden;
   }
   @keyframes gradientBG {
     0% { background-position: 0% 50%; }
@@ -26,90 +30,120 @@
     100% { background-position: 0% 50%; }
   }
   
-  /* FLOATING SHAPES */
-  body::before {
-    content: '';
+  /* FLOATING PARTICLES */
+  .particle {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-image: 
-      radial-gradient(circle at 20% 50%, rgba(255,107,53,0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 50%),
-      radial-gradient(circle at 40% 20%, rgba(251,191,36,0.1) 0%, transparent 50%);
+    border-radius: 50%;
     pointer-events: none;
     z-index: 0;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
   }
   
   .container { 
     max-width: 1200px; 
     margin: 0 auto; 
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 20px; 
-    box-shadow: 0 25px 70px rgba(0,0,0,0.3); 
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(15px);
+    border-radius: 25px; 
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4); 
     overflow: hidden;
     position: relative;
     z-index: 1;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255,255,255,0.4);
+    animation: containerEntry 0.8s ease;
+  }
+  @keyframes containerEntry {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
   
   .header { 
     background: linear-gradient(135deg, #FF6B35 0%, #EC4899 50%, #1E3A8A 100%); 
+    background-size: 200% 200%;
+    animation: headerShimmer 5s ease infinite;
     color: #fff; 
-    padding: 30px 25px; 
+    padding: 35px 25px; 
     text-align: center;
     position: relative;
     overflow: hidden;
+  }
+  @keyframes headerShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
   .header::before {
     content: '';
     position: absolute;
     top: -50%; left: -50%;
     width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: shimmer 3s infinite;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    animation: shimmer 4s infinite;
   }
   @keyframes shimmer {
-    0%, 100% { transform: translate(0,0); }
-    50% { transform: translate(30%, 30%); }
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    50% { transform: translate(20%, 20%) rotate(180deg); }
   }
   .header-content { position: relative; z-index: 2; }
   .header h1 { 
-    font-size: 32px; 
-    margin-bottom: 8px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    animation: slideDown 0.6s ease;
+    font-size: 36px; 
+    margin-bottom: 10px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    animation: slideDown 0.8s ease, textGlow 3s ease-in-out infinite;
   }
   @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
+    from { opacity: 0; transform: translateY(-30px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes textGlow {
+    0%, 100% { text-shadow: 3px 3px 6px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.3); }
+    50% { text-shadow: 3px 3px 6px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.6); }
   }
   .header p { 
     opacity: 0.95; 
-    font-size: 15px;
-    animation: slideDown 0.8s ease;
+    font-size: 16px;
+    animation: slideDown 1s ease;
   }
   .school-logo {
-    max-height: 80px;
-    max-width: 200px;
-    margin: 10px auto;
+    max-height: 90px;
+    max-width: 220px;
+    margin: 12px auto;
     display: block;
-    background: rgba(255,255,255,0.9);
-    padding: 8px 15px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.95);
+    padding: 10px 18px;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    animation: logoBounce 2s ease infinite;
+  }
+  @keyframes logoBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
   }
   
   .firebase-status { 
     background: linear-gradient(90deg, #28a745, #20c997); 
+    background-size: 200% 100%;
+    animation: statusSlide 3s ease infinite;
     color: #fff; 
-    padding: 10px 15px; 
+    padding: 12px 15px; 
     text-align: center; 
     font-size: 13px; 
     font-weight: 600;
-    box-shadow: 0 2px 10px rgba(40,167,69,0.3);
+    box-shadow: 0 3px 12px rgba(40,167,69,0.4);
+  }
+  @keyframes statusSlide {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
   .firebase-status.offline { 
     background: linear-gradient(90deg, #dc3545, #c82333); 
+    background-size: 200% 100%;
+    animation: statusSlide 3s ease infinite;
   }
   
   .tabs { 
@@ -121,7 +155,7 @@
   .tab { 
     flex: 1; 
     min-width: 120px; 
-    padding: 16px; 
+    padding: 18px; 
     text-align: center; 
     cursor: pointer; 
     border: none; 
@@ -129,50 +163,51 @@
     font-size: 14px; 
     font-weight: 600; 
     color: #666; 
-    transition: all 0.3s;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
   }
   .tab:hover { 
     background: rgba(255,107,53,0.1);
     color: #FF6B35;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
   }
   .tab.active { 
     background: #fff; 
     color: #FF6B35; 
     border-bottom: 3px solid #FF6B35;
+    animation: tabPop 0.4s ease;
   }
-  .tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -3px; left: 50%;
-    transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid #FF6B35;
+  @keyframes tabPop {
+    0% { transform: scale(0.9); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
   }
   
   .content { padding: 30px; min-height: 500px; }
   .section { display: none; }
-  .section.active { display: block; animation: fadeIn 0.4s; }
-  @keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(15px); } 
+  .section.active { display: block; animation: fadeInUp 0.5s ease; }
+  @keyframes fadeInUp { 
+    from { opacity: 0; transform: translateY(20px); } 
     to { opacity: 1; transform: translateY(0); } 
   }
   
   h2 { 
     color: #1E3A8A; 
-    margin-bottom: 20px; 
+    margin-bottom: 22px; 
     padding-bottom: 12px;
     border-bottom: 3px solid;
     border-image: linear-gradient(90deg, #FF6B35, #FBBF24, #EC4899) 1;
-    font-size: 24px;
+    font-size: 26px;
+    animation: slideInLeft 0.6s ease;
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
   }
   h3 { 
     color: #1E3A8A; 
-    margin: 15px 0 10px;
-    font-size: 18px;
+    margin: 18px 0 12px;
+    font-size: 19px;
   }
   
   .form-group { margin-bottom: 15px; }
@@ -187,7 +222,7 @@
     width: 100%; 
     padding: 12px; 
     border: 2px solid #e0e0e0; 
-    border-radius: 10px; 
+    border-radius: 12px; 
     font-size: 14px; 
     transition: all 0.3s;
     background: #fff;
@@ -195,15 +230,15 @@
   input:focus, select:focus, textarea:focus { 
     outline: none; 
     border-color: #FF6B35;
-    box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 4px rgba(255,107,53,0.15);
+    transform: translateY(-2px);
   }
   textarea { min-height: 80px; resize: vertical; font-family: inherit; }
   
   .btn { 
     padding: 12px 24px; 
     border: none; 
-    border-radius: 10px; 
+    border-radius: 12px; 
     cursor: pointer; 
     font-size: 14px; 
     font-weight: 600; 
@@ -218,7 +253,7 @@
     top: 50%; left: 50%;
     width: 0; height: 0;
     border-radius: 50%;
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.4);
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
   }
@@ -228,54 +263,54 @@
   .btn-primary { 
     background: linear-gradient(135deg, #FF6B35, #FF8C42); 
     color: #fff;
-    box-shadow: 0 4px 15px rgba(255,107,53,0.3);
+    box-shadow: 0 5px 18px rgba(255,107,53,0.4);
   }
   .btn-primary:hover { 
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255,107,53,0.6);
   }
   .btn-success { 
     background: linear-gradient(135deg, #28a745, #20c997); 
     color: #fff;
-    box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+    box-shadow: 0 5px 18px rgba(40,167,69,0.4);
   }
   .btn-success:hover { 
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(40,167,69,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(40,167,69,0.6);
   }
   .btn-danger { 
     background: linear-gradient(135deg, #dc3545, #c82333); 
     color: #fff;
-    box-shadow: 0 4px 15px rgba(220,53,69,0.3);
+    box-shadow: 0 5px 18px rgba(220,53,69,0.4);
   }
   .btn-danger:hover { 
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220,53,69,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220,53,69,0.6);
   }
   .btn-warning { 
     background: linear-gradient(135deg, #FBBF24, #F59E0B); 
     color: #333;
-    box-shadow: 0 4px 15px rgba(251,191,36,0.3);
+    box-shadow: 0 5px 18px rgba(251,191,36,0.4);
   }
   .btn-warning:hover { 
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(251,191,36,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(251,191,36,0.6);
   }
   .btn-info { 
     background: linear-gradient(135deg, #1E3A8A, #3B82F6); 
     color: #fff;
-    box-shadow: 0 4px 15px rgba(30,58,138,0.3);
+    box-shadow: 0 5px 18px rgba(30,58,138,0.4);
   }
   .btn-info:hover { 
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(30,58,138,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(30,58,138,0.6);
   }
   .btn-secondary { 
     background: linear-gradient(135deg, #6c757d, #495057); 
     color: #fff;
   }
   .btn-secondary:hover { 
-    transform: translateY(-2px);
+    transform: translateY(-3px);
   }
   .btn:disabled {
     opacity: 0.6;
@@ -293,8 +328,8 @@
     content: '';
     position: absolute;
     top: 50%; left: 50%;
-    width: 20px; height: 20px;
-    margin: -10px 0 0 -10px;
+    width: 22px; height: 22px;
+    margin: -11px 0 0 -11px;
     border: 3px solid rgba(255,255,255,0.3);
     border-top-color: #fff;
     border-radius: 50%;
@@ -307,28 +342,39 @@
   .quiz-card { 
     background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
     border: 2px solid #e0e0e0; 
-    border-radius: 15px; 
-    padding: 22px; 
-    margin-bottom: 18px;
-    transition: all 0.3s;
+    border-radius: 18px; 
+    padding: 24px; 
+    margin-bottom: 20px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: cardEntry 0.6s ease;
+  }
+  @keyframes cardEntry {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .quiz-card:hover { 
     border-color: #FF6B35; 
-    box-shadow: 0 8px 25px rgba(255,107,53,0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(255,107,53,0.2);
+    transform: translateY(-4px);
   }
   
   .question-item { 
     background: #fff; 
-    border-left: 4px solid #FF6B35;
-    border-radius: 10px; 
-    padding: 18px; 
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 5px solid #FF6B35;
+    border-radius: 12px; 
+    padding: 20px; 
+    margin-bottom: 15px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
     transition: all 0.3s;
+    animation: slideInRight 0.5s ease;
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
   }
   .question-item:hover {
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    transform: translateX(5px);
   }
   
   .option-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
@@ -336,13 +382,19 @@
   
   .badge { 
     display: inline-block; 
-    padding: 4px 12px; 
-    border-radius: 15px; 
+    padding: 5px 14px; 
+    border-radius: 20px; 
     font-size: 11px; 
     font-weight: 700; 
     margin-left: 5px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    animation: badgePop 0.4s ease;
+  }
+  @keyframes badgePop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
   }
   .badge-pg { background: linear-gradient(135deg, #3B82F6, #1E3A8A); color: #fff; }
   .badge-bs { background: linear-gradient(135deg, #28a745, #20c997); color: #fff; }
@@ -351,11 +403,16 @@
   .badge-multi { background: linear-gradient(135deg, #dc3545, #c82333); color: #fff; }
   
   .alert { 
-    padding: 14px 18px; 
-    border-radius: 10px; 
-    margin-bottom: 15px; 
+    padding: 16px 20px; 
+    border-radius: 12px; 
+    margin-bottom: 18px; 
     font-size: 14px;
-    border-left: 4px solid;
+    border-left: 5px solid;
+    animation: alertSlide 0.5s ease;
+  }
+  @keyframes alertSlide {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
   }
   .alert-info { 
     background: linear-gradient(135deg, #DBEAFE, #BFDBFE); 
@@ -381,46 +438,48 @@
   .link-box { 
     background: linear-gradient(135deg, #FEF3C7, #FDE68A);
     border: 2px dashed #F59E0B; 
-    border-radius: 10px; 
-    padding: 15px; 
+    border-radius: 12px; 
+    padding: 16px; 
     margin: 15px 0; 
     word-break: break-all; 
     font-family: monospace; 
     font-size: 13px;
   }
   
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-  table th, table td { padding: 12px; border: 1px solid #e5e7eb; text-align: left; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+  table th, table td { padding: 13px; border: 1px solid #e5e7eb; text-align: left; font-size: 14px; }
   table th { 
     background: linear-gradient(135deg, #1E3A8A, #3B82F6); 
     color: #fff;
     font-weight: 600;
   }
   table tr:nth-child(even) { background: #f9fafb; }
-  table tr:hover { background: #FEF3C7; transition: background 0.3s; }
+  table tr { transition: all 0.3s; }
+  table tr:hover { background: #FEF3C7; transform: scale(1.01); }
   
   .img-preview { 
-    max-width: 200px; 
-    max-height: 150px; 
-    border-radius: 10px; 
+    max-width: 220px; 
+    max-height: 160px; 
+    border-radius: 12px; 
     margin-top: 10px; 
-    border: 2px solid #e0e0e0;
+    border: 3px solid #e0e0e0;
     cursor: zoom-in;
     transition: all 0.3s;
   }
   .img-preview:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transform: scale(1.08) rotate(1deg);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    border-color: #FF6B35;
   }
   
   .student-view { background: #fff; padding: 30px; }
   .student-view h2 { text-align: center; color: #1E3A8A; }
   .student-info { 
     background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-    padding: 18px; 
-    border-radius: 12px; 
-    margin-bottom: 20px;
-    border-left: 4px solid #F59E0B;
+    padding: 20px; 
+    border-radius: 14px; 
+    margin-bottom: 22px;
+    border-left: 5px solid #F59E0B;
   }
   
   .timer { 
@@ -428,26 +487,26 @@
     top: 10px; 
     background: linear-gradient(135deg, #dc3545, #c82333); 
     color: #fff; 
-    padding: 12px; 
-    border-radius: 10px; 
+    padding: 14px; 
+    border-radius: 12px; 
     text-align: center; 
     font-weight: 700; 
-    font-size: 20px; 
+    font-size: 22px; 
     margin-bottom: 15px; 
     z-index: 100;
-    box-shadow: 0 4px 15px rgba(220,53,69,0.4);
-    animation: pulse 2s infinite;
+    box-shadow: 0 6px 20px rgba(220,53,69,0.5);
+    animation: timerPulse 1.5s infinite;
   }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 4px 15px rgba(220,53,69,0.4); }
-    50% { box-shadow: 0 4px 25px rgba(220,53,69,0.7); }
+  @keyframes timerPulse {
+    0%, 100% { box-shadow: 0 6px 20px rgba(220,53,69,0.5); }
+    50% { box-shadow: 0 6px 35px rgba(220,53,69,0.9); }
   }
   
   .match-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
   .match-col { 
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     padding: 15px; 
-    border-radius: 10px;
+    border-radius: 12px;
   }
   .match-item { 
     padding: 10px; 
@@ -464,10 +523,11 @@
     padding: 10px; 
     cursor: pointer;
     border-radius: 8px;
-    transition: background 0.2s;
+    transition: all 0.3s;
   }
   .checkbox-label:hover { 
     background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    transform: translateX(5px);
   }
   
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -475,34 +535,41 @@
   @media (max-width: 768px) { 
     .grid-2, .grid-3 { grid-template-columns: 1fr; } 
     .content { padding: 15px; } 
-    .header h1 { font-size: 22px; } 
+    .header h1 { font-size: 24px; } 
     .match-container { grid-template-columns: 1fr; }
   }
   
   .result-summary { 
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-    gap: 15px; 
-    margin-bottom: 20px; 
+    gap: 18px; 
+    margin-bottom: 22px; 
   }
   .result-card { 
     background: linear-gradient(135deg, #FF6B35, #EC4899); 
     color: #fff; 
-    padding: 22px; 
-    border-radius: 15px; 
+    padding: 24px; 
+    border-radius: 18px; 
     text-align: center;
-    box-shadow: 0 8px 25px rgba(255,107,53,0.3);
-    transition: transform 0.3s;
+    box-shadow: 0 10px 30px rgba(255,107,53,0.4);
+    transition: all 0.4s;
+    animation: cardBounce 0.6s ease;
+  }
+  @keyframes cardBounce {
+    0% { opacity: 0; transform: scale(0.5); }
+    60% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
   }
   .result-card:hover {
-    transform: translateY(-5px) scale(1.02);
+    transform: translateY(-8px) rotate(2deg);
+    box-shadow: 0 15px 40px rgba(255,107,53,0.6);
   }
-  .result-card:nth-child(2) { background: linear-gradient(135deg, #1E3A8A, #3B82F6); box-shadow: 0 8px 25px rgba(30,58,138,0.3); }
-  .result-card:nth-child(3) { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; box-shadow: 0 8px 25px rgba(251,191,36,0.3); }
-  .result-card:nth-child(4) { background: linear-gradient(135deg, #EC4899, #BE185D); box-shadow: 0 8px 25px rgba(236,72,153,0.3); }
-  .result-card:nth-child(5) { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 8px 25px rgba(16,185,129,0.3); }
+  .result-card:nth-child(2) { background: linear-gradient(135deg, #1E3A8A, #3B82F6); box-shadow: 0 10px 30px rgba(30,58,138,0.4); }
+  .result-card:nth-child(3) { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; box-shadow: 0 10px 30px rgba(251,191,36,0.4); }
+  .result-card:nth-child(4) { background: linear-gradient(135deg, #EC4899, #BE185D); box-shadow: 0 10px 30px rgba(236,72,153,0.4); }
+  .result-card:nth-child(5) { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 10px 30px rgba(16,185,129,0.4); }
   
-  .result-card .num { font-size: 36px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+  .result-card .num { font-size: 40px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
   .result-card .lbl { font-size: 13px; opacity: 0.95; margin-top: 5px; font-weight: 600; }
   
   .hidden { display: none !important; }
@@ -518,26 +585,26 @@
   
   .live-indicator { 
     display: inline-block; 
-    width: 10px; 
-    height: 10px; 
+    width: 12px; 
+    height: 12px; 
     background: #10B981; 
     border-radius: 50%; 
     margin-right: 5px; 
-    animation: pulse-dot 2s infinite;
+    animation: pulseDot 1.5s infinite;
   }
-  @keyframes pulse-dot { 
+  @keyframes pulseDot { 
     0%, 100% { opacity: 1; transform: scale(1); } 
-    50% { opacity: 0.5; transform: scale(1.2); } 
+    50% { opacity: 0.5; transform: scale(1.3); } 
   }
   
   .sync-badge { 
     background: linear-gradient(135deg, #10B981, #059669); 
     color: #fff; 
-    padding: 4px 12px; 
-    border-radius: 15px; 
+    padding: 5px 14px; 
+    border-radius: 20px; 
     font-size: 11px; 
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+    box-shadow: 0 3px 10px rgba(16,185,129,0.4);
   }
   .sync-badge.syncing { 
     background: linear-gradient(135deg, #FBBF24, #F59E0B); 
@@ -550,14 +617,16 @@
     bottom: 30px; 
     right: 30px;
     background: linear-gradient(135deg, #FF6B35, #EC4899);
+    background-size: 200% 200%;
+    animation: gradientBG 3s ease infinite;
     color: #fff; 
     border: none; 
     border-radius: 50px;
-    padding: 16px 28px; 
+    padding: 18px 30px; 
     font-size: 16px; 
     font-weight: 700;
     cursor: pointer; 
-    box-shadow: 0 8px 30px rgba(255,107,53,0.5);
+    box-shadow: 0 10px 35px rgba(255,107,53,0.6);
     z-index: 1000; 
     transition: all 0.3s;
     display: flex; 
@@ -565,27 +634,33 @@
     gap: 8px;
   }
   .floating-add-btn:hover { 
-    transform: translateY(-3px) scale(1.05); 
-    box-shadow: 0 12px 40px rgba(255,107,53,0.6);
+    transform: translateY(-5px) scale(1.05); 
+    box-shadow: 0 15px 45px rgba(255,107,53,0.8);
   }
   .floating-add-btn:active {
-    transform: translateY(-1px) scale(1);
+    transform: translateY(-2px) scale(1);
   }
   
   .upload-progress {
     background: linear-gradient(135deg, #DBEAFE, #BFDBFE); 
     border: 2px solid #3B82F6;
-    border-radius: 10px; 
+    border-radius: 12px; 
     padding: 12px; 
     margin-top: 10px; 
     font-size: 13px;
   }
   .progress-bar {
     background: linear-gradient(90deg, #FF6B35, #EC4899); 
-    height: 10px; 
-    border-radius: 5px;
+    background-size: 200% 100%;
+    animation: progressShimmer 2s ease infinite;
+    height: 12px; 
+    border-radius: 6px;
     margin-top: 8px; 
     transition: width 0.3s;
+  }
+  @keyframes progressShimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
   }
   
   .img-size-info {
@@ -603,63 +678,66 @@
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
+    background: rgba(0,0,0,0.92);
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: zoom-out;
+    animation: zoomFadeIn 0.3s ease;
+  }
+  @keyframes zoomFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   .zoom-modal img {
     max-width: 90%;
     max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+    border-radius: 12px;
+    box-shadow: 0 15px 60px rgba(0,0,0,0.7);
     transition: transform 0.3s;
     cursor: grab;
   }
-  .zoom-modal img:active {
-    cursor: grabbing;
-  }
+  .zoom-modal img:active { cursor: grabbing; }
   .zoom-controls {
     position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255,255,255,0.95);
-    padding: 12px 20px;
+    background: rgba(255,255,255,0.97);
+    padding: 14px 22px;
     border-radius: 50px;
     display: flex;
-    gap: 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    gap: 12px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.4);
     z-index: 10000;
   }
   .zoom-btn {
-    width: 40px; height: 40px;
+    width: 45px; height: 45px;
     border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, #FF6B35, #EC4899);
     color: #fff;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s;
   }
   .zoom-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(10deg);
   }
   .zoom-close {
     position: fixed;
     top: 20px; right: 20px;
-    width: 50px; height: 50px;
+    width: 55px; height: 55px;
     border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, #dc3545, #c82333);
     color: #fff;
-    font-size: 24px;
+    font-size: 26px;
     cursor: pointer;
     z-index: 10001;
-    box-shadow: 0 4px 15px rgba(220,53,69,0.5);
+    box-shadow: 0 6px 20px rgba(220,53,69,0.6);
     transition: all 0.3s;
   }
   .zoom-close:hover {
@@ -669,14 +747,14 @@
     position: fixed;
     top: 20px; left: 50%;
     transform: translateX(-50%);
-    background: rgba(255,255,255,0.95);
-    padding: 10px 20px;
-    border-radius: 25px;
+    background: rgba(255,255,255,0.97);
+    padding: 12px 22px;
+    border-radius: 30px;
     font-size: 13px;
     color: #1E3A8A;
     font-weight: 600;
     z-index: 10001;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
   }
   
   /* LOADING OVERLAY */
@@ -684,39 +762,54 @@
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
     z-index: 9998;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 20px;
+    gap: 22px;
+    animation: fadeIn 0.3s ease;
   }
   .loading-overlay .spinner-big {
-    width: 60px; height: 60px;
-    border: 5px solid rgba(255,255,255,0.2);
+    width: 70px; height: 70px;
+    border: 6px solid rgba(255,255,255,0.2);
     border-top-color: #FF6B35;
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
   .loading-overlay .loading-text {
     color: #fff;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
   }
   
-  /* LOGO UPLOAD PREVIEW */
   .logo-preview {
     max-width: 150px;
     max-height: 80px;
-    border-radius: 10px;
+    border-radius: 12px;
     margin-top: 10px;
     border: 2px solid #e0e0e0;
+  }
+  
+  /* ACTION BUTTONS GROUP */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .action-buttons .btn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 </style>
 </head>
 <body>
+
+<!-- PARTICLES CONTAINER -->
+<div id="particles"></div>
 
 <div class="container">
   <div class="header">
@@ -750,13 +843,14 @@
           <strong>✅ Sistem Aktif!</strong><br>
           • Data kuis & hasil siswa: <b>Firebase Firestore</b> (Real-time)<br>
           • Upload gambar soal: <b>Cloudinary</b> (25GB gratis, CDN global)<br>
+          • Export soal ke <b>Microsoft Word (DOCX)</b> untuk dicetak<br>
           • Hasil siswa otomatis masuk dashboard guru dari device manapun!
         </div>
         <div class="alert alert-info">
           <strong>📌 Panduan Cepat:</strong><br>
           1. Tab <b>Pengaturan</b> → upload logo sekolah & isi API keys (opsional)<br>
           2. Tab <b>Buat Kuis</b> → buat kuis + upload gambar (otomatis ke Cloudinary)<br>
-          3. Tab <b>Daftar Kuis</b> → salin link & share ke siswa<br>
+          3. Tab <b>Daftar Kuis</b> → salin link, export DOCX, & share ke siswa<br>
           4. Tab <b>Hasil Siswa</b> → lihat hasil real-time + export Excel
         </div>
       </div>
@@ -919,7 +1013,7 @@
           <h3>🤖 Gemini AI API Key (Untuk auto-generate soal)</h3>
           <div class="alert alert-info">
             <strong>Cara mendapatkan API Key:</strong><br>
-            1. Buka <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br>
+            1. Buka <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a><br>
             2. Login dengan akun Google → Klik "Create API Key"<br>
             3. Salin dan tempel di bawah ini (gratis)
           </div>
@@ -989,6 +1083,9 @@ const CLOUDINARY_CONFIG = {
   uploadPreset: 'kuis-smkn2dompu'
 };
 
+// ==================== KONFIGURASI AI ====================
+const AI_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+
 // ==================== STATE MANAGEMENT ====================
 let state = {
   quizzes: [],
@@ -1001,6 +1098,27 @@ let state = {
   currentQuestions: [],
   unsubscribers: []
 };
+
+// ==================== PARTICLES ANIMATION ====================
+function createParticles() {
+  const container = document.getElementById('particles');
+  const colors = ['#FF6B35', '#1E3A8A', '#FBBF24', '#EC4899', '#10B981'];
+  
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    const size = Math.random() * 15 + 5;
+    particle.style.width = size + 'px';
+    particle.style.height = size + 'px';
+    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    particle.style.animationDelay = Math.random() * 10 + 's';
+    particle.style.opacity = Math.random() * 0.5 + 0.2;
+    container.appendChild(particle);
+  }
+}
+createParticles();
 
 // ==================== INIT ====================
 window.addEventListener('load', () => {
@@ -1147,19 +1265,6 @@ function showLoading(text = 'Memproses...') {
 
 function hideLoading() {
   document.getElementById('loadingOverlay').classList.add('hidden');
-}
-
-function setButtonLoading(btnId, isLoading, originalText = '') {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  if (isLoading) {
-    btn.dataset.originalText = btn.innerHTML;
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-  } else {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-  }
 }
 
 // ==================== SETTINGS ====================
@@ -1514,7 +1619,6 @@ function applyZoom() {
   img.style.transform = `translate(${zoomState.x}px, ${zoomState.y}px) scale(${zoomState.scale})`;
 }
 
-// Drag functionality
 document.addEventListener('DOMContentLoaded', () => {
   const img = document.getElementById('zoomImage');
   if (!img) return;
@@ -1541,7 +1645,6 @@ document.addEventListener('DOMContentLoaded', () => {
     img.style.cursor = 'grab';
   });
   
-  // Scroll wheel zoom
   img.addEventListener('wheel', e => {
     e.preventDefault();
     if (e.deltaY < 0) zoomIn();
@@ -1549,12 +1652,154 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeZoom();
   if (e.key === '+' || e.key === '=') zoomIn();
   if (e.key === '-') zoomOut();
 });
+
+// ==================== EXPORT TO DOCX ====================
+function exportToDocx(quizId) {
+  const quiz = state.quizzes.find(q => q.id === quizId);
+  if (!quiz) return;
+  
+  showLoading('Membuat dokumen Word...');
+  
+  // Build HTML content for DOCX
+  let html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6; margin: 2cm; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #000; padding-bottom: 15px; }
+        .header h1 { font-size: 18pt; margin: 0; }
+        .header h2 { font-size: 14pt; margin: 5px 0; font-weight: normal; }
+        .info { margin: 20px 0; padding: 10px; background: #f5f5f5; border-left: 4px solid #333; }
+        .question { margin: 20px 0; page-break-inside: avoid; }
+        .question-number { font-weight: bold; font-size: 13pt; margin-bottom: 8px; }
+        .question-text { margin-bottom: 10px; white-space: pre-wrap; }
+        .question-image { max-width: 400px; margin: 10px 0; }
+        .options { margin-left: 20px; }
+        .option { margin: 5px 0; }
+        .answer-key { margin-top: 30px; page-break-before: always; border-top: 2px solid #000; padding-top: 20px; }
+        .answer-key h2 { font-size: 16pt; text-align: center; }
+        .answer-item { margin: 8px 0; padding: 5px; background: #ffffcc; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        table td, table th { border: 1px solid #000; padding: 8px; }
+        .footer { text-align: center; margin-top: 30px; font-size: 10pt; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>${escapeHtml(quiz.title)}</h1>
+        <h2>Mata Pelajaran: ${escapeHtml(quiz.subject)}</h2>
+        ${quiz.description ? `<p>${escapeHtml(quiz.description)}</p>` : ''}
+      </div>
+      
+      <div class="info">
+        <table>
+          <tr><td><strong>Nama:</strong></td><td>.......................................................</td></tr>
+          <tr><td><strong>Kelas:</strong></td><td>.......................................................</td></tr>
+          <tr><td><strong>NIS:</strong></td><td>.......................................................</td></tr>
+          <tr><td><strong>Hari/Tanggal:</strong></td><td>.......................................................</td></tr>
+          <tr><td><strong>Durasi:</strong></td><td>${quiz.duration > 0 ? quiz.duration + ' menit' : 'Tanpa batas'}</td></tr>
+        </table>
+      </div>
+      
+      <h3 style="text-align:center; margin: 25px 0;">SOAL</h3>
+  `;
+  
+  (quiz.questions || []).forEach((q, idx) => {
+    html += `<div class="question">`;
+    html += `<div class="question-number">Soal ${idx + 1} (${q.weight} poin) <span style="font-weight:normal;font-size:11pt;">[${getTypeName(q.type)}]</span></div>`;
+    html += `<div class="question-text">${escapeHtml(q.text)}</div>`;
+    
+    if (q.image) {
+      html += `<img src="${q.image}" class="question-image"><br>`;
+    }
+    
+    if (q.type === 'pg' || q.type === 'multi') {
+      html += `<div class="options">`;
+      q.options.forEach((opt, oIdx) => {
+        html += `<div class="option"><strong>${String.fromCharCode(65+oIdx)}.</strong> ${escapeHtml(opt.text)}</div>`;
+      });
+      html += `</div>`;
+    } else if (q.type === 'bs') {
+      html += `<div class="options">
+        <div class="option">○ Benar</div>
+        <div class="option">○ Salah</div>
+      </div>`;
+    } else if (q.type === 'esai') {
+      html += `<div style="border: 1px solid #ccc; min-height: 100px; margin-top: 10px; padding: 10px;">Jawaban: </div>`;
+    } else if (q.type === 'match') {
+      html += `<table><tr><th>Pernyataan</th><th>Pasangan</th></tr>`;
+      q.matchPairs.forEach(p => {
+        html += `<tr><td>${escapeHtml(p.left)}</td><td>....................</td></tr>`;
+      });
+      html += `</table>`;
+    }
+    
+    html += `</div>`;
+  });
+  
+  // Answer Key Section
+  html += `<div class="answer-key">
+    <h2>KUNCI JAWABAN</h2>
+    <p style="text-align:center;font-size:10pt;">(Hanya untuk guru)</p>
+  `;
+  
+  (quiz.questions || []).forEach((q, idx) => {
+    let answer = '';
+    if (q.type === 'pg') {
+      const correct = q.options.find(o => o.correct);
+      answer = correct ? String.fromCharCode(65 + q.options.indexOf(correct)) : '-';
+    } else if (q.type === 'multi') {
+      answer = q.options.filter(o => o.correct).map(o => String.fromCharCode(65 + q.options.indexOf(o))).join(', ');
+    } else if (q.type === 'bs') {
+      answer = q.correctBool ? 'Benar' : 'Salah';
+    } else if (q.type === 'esai') {
+      answer = q.essayAnswer || '(Dinilai manual)';
+    } else if (q.type === 'match') {
+      answer = q.matchPairs.map(p => `${p.left} → ${p.right}`).join('; ');
+    }
+    
+    html += `<div class="answer-item"><strong>Soal ${idx+1}:</strong> ${escapeHtml(answer)}</div>`;
+  });
+  
+  html += `</div>`;
+  html += `<div class="footer">Dokumen dibuat dengan Aplikasi Kuis SMKN 2 Dompu | ${new Date().toLocaleDateString('id-ID')}</div>`;
+  html += `</body></html>`;
+  
+  // Convert to DOCX using html-docx-js
+  try {
+    const converted = htmlDocx.asBlob(html, {
+      orientation: 'portrait',
+      margins: { top: 720, bottom: 720, left: 1080, right: 1080 }
+    });
+    
+    const url = URL.createObjectURL(converted);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${quiz.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    hideLoading();
+    alert('✅ Dokumen Word berhasil dibuat!\n\nFile akan otomatis terdownload.');
+  } catch (err) {
+    hideLoading();
+    alert('❌ Gagal membuat dokumen: ' + err.message);
+  }
+}
+
+function getTypeName(type) {
+  const names = {pg: 'Pilihan Ganda', bs: 'Benar/Salah', esai: 'Esai', match: 'Pencocokan', multi: 'Jawaban Lebih dari Satu'};
+  return names[type] || type;
+}
 
 // ==================== AI GENERATE ====================
 async function generateWithAI() {
@@ -1588,41 +1833,64 @@ Format JSON array dengan struktur:
 ${type !== 'campuran' ? `Semua soal harus bertipe "${type}".` : 'Campuran semua jenis soal.'}
 Kembalikan HANYA JSON array valid tanpa markdown, tanpa penjelasan.`;
 
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${state.geminiKey}`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        contents: [{parts: [{text: prompt}]}],
-        generationConfig: {temperature: 0.7, maxOutputTokens: 8000}
-      })
-    });
-    
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
-    
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const questions = JSON.parse(text);
-    
-    questions.forEach(q => {
-      q.id = 'q_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-      if (!q.weight) q.weight = 10;
-      if (q.type === 'pg' || q.type === 'multi') { if (!q.options) q.options = []; }
-      else if (q.type === 'match') { if (!q.matchPairs) q.matchPairs = []; }
-      else if (q.type === 'bs') { if (q.correctBool === undefined) q.correctBool = true; }
-      else if (q.type === 'esai') { if (!q.essayAnswer) q.essayAnswer = ''; }
-    });
-    
-    state.currentQuestions = [...state.currentQuestions, ...questions];
-    renderQuestions();
-    alert(`✅ Berhasil generate ${questions.length} soal!`);
-  } catch (err) {
-    alert('❌ Error: ' + err.message);
-  } finally {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
+  let lastError = null;
+  
+  for (const model of AI_MODELS) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${state.geminiKey}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          contents: [{parts: [{text: prompt}]}],
+          generationConfig: {temperature: 0.7, maxOutputTokens: 8000}
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        lastError = data.error.message;
+        if (data.error.message.includes('high demand') || 
+            data.error.message.includes('not found') ||
+            data.error.message.includes('not available')) {
+          continue;
+        }
+        throw new Error(data.error.message);
+      }
+      
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error('Respons API tidak valid. Coba lagi.');
+      }
+      
+      let text = data.candidates[0].content.parts[0].text;
+      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      const questions = JSON.parse(text);
+      
+      questions.forEach(q => {
+        q.id = 'q_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        if (!q.weight) q.weight = 10;
+        if (q.type === 'pg' || q.type === 'multi') { if (!q.options) q.options = []; }
+        else if (q.type === 'match') { if (!q.matchPairs) q.matchPairs = []; }
+        else if (q.type === 'bs') { if (q.correctBool === undefined) q.correctBool = true; }
+        else if (q.type === 'esai') { if (!q.essayAnswer) q.essayAnswer = ''; }
+      });
+      
+      state.currentQuestions = [...state.currentQuestions, ...questions];
+      renderQuestions();
+      alert(`✅ Berhasil generate ${questions.length} soal!\n(Menggunakan model: ${model})`);
+      btn.classList.remove('btn-loading');
+      btn.disabled = false;
+      return;
+      
+    } catch (err) {
+      lastError = err.message;
+      continue;
+    }
   }
+  
+  alert('❌ Semua model AI sedang sibuk.\n\nError terakhir: ' + lastError + '\n\nSilakan coba lagi dalam 5-10 menit.');
+  btn.classList.remove('btn-loading');
+  btn.disabled = false;
 }
 
 // ==================== SAVE QUIZ ====================
@@ -1698,12 +1966,12 @@ function renderQuizList() {
   
   const baseUrl = window.location.href.split('#')[0];
   
-  container.innerHTML = state.quizzes.map(q => {
+  container.innerHTML = state.quizzes.map((q, idx) => {
     const link = baseUrl + '#quiz=' + q.id;
     const resultCount = state.results.filter(r => r.quizId === q.id).length;
     const totalWeight = (q.questions || []).reduce((s, x) => s + x.weight, 0);
     return `
-      <div class="quiz-card">
+      <div class="quiz-card" style="animation-delay: ${idx * 0.1}s;">
         <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:10px;">
           <div style="flex:1;">
             <h3 style="margin:0;">${escapeHtml(q.title)}</h3>
@@ -1722,8 +1990,11 @@ function renderQuizList() {
         <div class="link-box">
           🔗 <strong>Link Kuis:</strong><br>
           ${link}<br>
-          <button class="btn btn-success" style="padding:3px 10px;font-size:11px;margin-top:5px;" onclick="copyLink('${link}')">📋 Salin Link</button>
-          <button class="btn btn-info" style="padding:3px 10px;font-size:11px;margin-top:5px;" onclick="shareWA('${encodeURIComponent(q.title)}', '${link}')">📱 Share WhatsApp</button>
+          <div class="action-buttons">
+            <button class="btn btn-success" style="padding:3px 10px;font-size:11px;" onclick="copyLink('${link}')">📋 Salin Link</button>
+            <button class="btn btn-info" style="padding:3px 10px;font-size:11px;" onclick="shareWA('${encodeURIComponent(q.title)}', '${link}')">📱 Share WA</button>
+            <button class="btn btn-warning" style="padding:3px 10px;font-size:11px;" onclick="exportToDocx('${q.id}')">📄 Export DOCX</button>
+          </div>
         </div>
       </div>
     `;
@@ -1807,6 +2078,7 @@ function loadResults() {
       <div class="result-card"><div class="num">${passed}/${quizResults.length}</div><div class="lbl">Lulus KKM (${quiz.passing})</div></div>
     </div>
     <button class="btn btn-success" onclick="exportExcel('${quizId}')">📊 Export ke Excel</button>
+    <button class="btn btn-warning" onclick="exportToDocx('${quizId}')">📄 Export ke Word (DOCX)</button>
     <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak</button>
     <table>
       <thead>
@@ -1941,7 +2213,7 @@ function renderStudentForm() {
     });
   });
   
-  const logoHtml = state.schoolLogo ? `<img src="${state.schoolLogo}" style="max-height:60px;margin-bottom:15px;background:#fff;padding:8px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);">` : '';
+  const logoHtml = state.schoolLogo ? `<img src="${state.schoolLogo}" style="max-height:70px;margin-bottom:15px;background:#fff;padding:10px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.15);animation:logoBounce 2s ease infinite;">` : '';
   
   container.innerHTML = `
     ${logoHtml}
