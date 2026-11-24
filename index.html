@@ -8,19 +8,18 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<!-- Library untuk Export DOCX -->
 <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
   
-  /* ANIMATED GRADIENT BACKGROUND */
   body {
     background: linear-gradient(-45deg, #FF6B35, #1E3A8A, #FBBF24, #EC4899, #FF6B35, #10B981);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
     min-height: 100vh;
     padding: 20px;
+    padding-bottom: 100px;
     position: relative;
     overflow-x: hidden;
   }
@@ -30,7 +29,6 @@
     100% { background-position: 0% 50%; }
   }
   
-  /* FLOATING PARTICLES */
   .particle {
     position: fixed;
     border-radius: 50%;
@@ -142,48 +140,95 @@
   }
   .firebase-status.offline { 
     background: linear-gradient(90deg, #dc3545, #c82333); 
-    background-size: 200% 100%;
-    animation: statusSlide 3s ease infinite;
   }
   
-  .tabs { 
-    display: flex; 
-    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 3px solid #FF6B35; 
-    flex-wrap: wrap; 
+  .bottom-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 50px;
+    padding: 10px 15px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.5);
+    display: flex;
+    gap: 5px;
+    z-index: 1000;
+    max-width: 95%;
+    overflow-x: auto;
+    animation: navSlideUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .tab { 
-    flex: 1; 
-    min-width: 120px; 
-    padding: 18px; 
-    text-align: center; 
-    cursor: pointer; 
-    border: none; 
-    background: none; 
-    font-size: 14px; 
-    font-weight: 600; 
-    color: #666; 
+  @keyframes navSlideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(100px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .bottom-nav::-webkit-scrollbar { display: none; }
+  
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 40px;
+    cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-width: 70px;
     position: relative;
+    color: #666;
   }
-  .tab:hover { 
+  .nav-item:hover {
     background: rgba(255,107,53,0.1);
-    color: #FF6B35;
     transform: translateY(-3px);
   }
-  .tab.active { 
-    background: #fff; 
-    color: #FF6B35; 
-    border-bottom: 3px solid #FF6B35;
-    animation: tabPop 0.4s ease;
+  .nav-item.active {
+    background: linear-gradient(135deg, #FF6B35, #EC4899);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(255,107,53,0.5);
+    transform: translateY(-5px) scale(1.05);
   }
-  @keyframes tabPop {
-    0% { transform: scale(0.9); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+  .nav-item .nav-icon {
+    font-size: 22px;
+    margin-bottom: 3px;
+    transition: transform 0.3s;
+  }
+  .nav-item.active .nav-icon {
+    transform: scale(1.2);
+    animation: iconBounce 0.5s ease;
+  }
+  @keyframes iconBounce {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.4); }
+  }
+  .nav-item .nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .nav-item .nav-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 16px;
+    text-align: center;
   }
   
-  .content { padding: 30px; min-height: 500px; }
+  @media (max-width: 600px) {
+    .nav-item { min-width: 60px; padding: 8px 10px; }
+    .nav-item .nav-icon { font-size: 18px; }
+    .nav-item .nav-label { font-size: 9px; }
+  }
+  
+  .content { padding: 30px; padding-bottom: 30px; min-height: 500px; }
   .section { display: none; }
   .section.active { display: block; animation: fadeInUp 0.5s ease; }
   @keyframes fadeInUp { 
@@ -257,73 +302,52 @@
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
   }
-  .btn:active::before {
-    width: 300px; height: 300px;
-  }
+  .btn:active::before { width: 300px; height: 300px; }
+  
   .btn-primary { 
     background: linear-gradient(135deg, #FF6B35, #FF8C42); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(255,107,53,0.4);
   }
-  .btn-primary:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255,107,53,0.6);
-  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,107,53,0.6); }
   .btn-success { 
     background: linear-gradient(135deg, #28a745, #20c997); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(40,167,69,0.4);
   }
-  .btn-success:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(40,167,69,0.6);
-  }
+  .btn-success:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(40,167,69,0.6); }
   .btn-danger { 
     background: linear-gradient(135deg, #dc3545, #c82333); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(220,53,69,0.4);
   }
-  .btn-danger:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(220,53,69,0.6);
-  }
+  .btn-danger:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(220,53,69,0.6); }
   .btn-warning { 
     background: linear-gradient(135deg, #FBBF24, #F59E0B); 
     color: #333;
     box-shadow: 0 5px 18px rgba(251,191,36,0.4);
   }
-  .btn-warning:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(251,191,36,0.6);
-  }
+  .btn-warning:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(251,191,36,0.6); }
   .btn-info { 
     background: linear-gradient(135deg, #1E3A8A, #3B82F6); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(30,58,138,0.4);
   }
-  .btn-info:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(30,58,138,0.6);
-  }
+  .btn-info:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(30,58,138,0.6); }
   .btn-secondary { 
     background: linear-gradient(135deg, #6c757d, #495057); 
     color: #fff;
   }
-  .btn-secondary:hover { 
-    transform: translateY(-3px);
+  .btn-secondary:hover { transform: translateY(-3px); }
+  .btn-purple {
+    background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+    color: #fff;
+    box-shadow: 0 5px 18px rgba(139,92,246,0.4);
   }
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-  }
+  .btn-purple:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(139,92,246,0.6); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
   
-  /* LOADING SPINNER ON BUTTON */
-  .btn-loading {
-    position: relative;
-    color: transparent !important;
-    pointer-events: none;
-  }
+  .btn-loading { position: relative; color: transparent !important; pointer-events: none; }
   .btn-loading::after {
     content: '';
     position: absolute;
@@ -335,9 +359,7 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
-  @keyframes spin { 
-    to { transform: rotate(360deg); } 
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
   
   .quiz-card { 
     background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
@@ -414,26 +436,10 @@
     from { opacity: 0; transform: translateX(-20px); }
     to { opacity: 1; transform: translateX(0); }
   }
-  .alert-info { 
-    background: linear-gradient(135deg, #DBEAFE, #BFDBFE); 
-    color: #1E3A8A; 
-    border-color: #3B82F6;
-  }
-  .alert-success { 
-    background: linear-gradient(135deg, #D1FAE5, #A7F3D0); 
-    color: #065F46; 
-    border-color: #10B981;
-  }
-  .alert-warning { 
-    background: linear-gradient(135deg, #FEF3C7, #FDE68A); 
-    color: #92400E; 
-    border-color: #F59E0B;
-  }
-  .alert-danger { 
-    background: linear-gradient(135deg, #FEE2E2, #FECACA); 
-    color: #991B1B; 
-    border-color: #EF4444;
-  }
+  .alert-info { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #1E3A8A; border-color: #3B82F6; }
+  .alert-success { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #065F46; border-color: #10B981; }
+  .alert-warning { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #92400E; border-color: #F59E0B; }
+  .alert-danger { background: linear-gradient(135deg, #FEE2E2, #FECACA); color: #991B1B; border-color: #EF4444; }
   
   .link-box { 
     background: linear-gradient(135deg, #FEF3C7, #FDE68A);
@@ -448,20 +454,14 @@
   
   table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
   table th, table td { padding: 13px; border: 1px solid #e5e7eb; text-align: left; font-size: 14px; }
-  table th { 
-    background: linear-gradient(135deg, #1E3A8A, #3B82F6); 
-    color: #fff;
-    font-weight: 600;
-  }
+  table th { background: linear-gradient(135deg, #1E3A8A, #3B82F6); color: #fff; font-weight: 600; }
   table tr:nth-child(even) { background: #f9fafb; }
   table tr { transition: all 0.3s; }
   table tr:hover { background: #FEF3C7; transform: scale(1.01); }
   
   .img-preview { 
-    max-width: 220px; 
-    max-height: 160px; 
-    border-radius: 12px; 
-    margin-top: 10px; 
+    max-width: 220px; max-height: 160px; 
+    border-radius: 12px; margin-top: 10px; 
     border: 3px solid #e0e0e0;
     cursor: zoom-in;
     transition: all 0.3s;
@@ -476,24 +476,16 @@
   .student-view h2 { text-align: center; color: #1E3A8A; }
   .student-info { 
     background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-    padding: 20px; 
-    border-radius: 14px; 
-    margin-bottom: 22px;
+    padding: 20px; border-radius: 14px; margin-bottom: 22px;
     border-left: 5px solid #F59E0B;
   }
   
   .timer { 
-    position: sticky; 
-    top: 10px; 
+    position: sticky; top: 10px; 
     background: linear-gradient(135deg, #dc3545, #c82333); 
-    color: #fff; 
-    padding: 14px; 
-    border-radius: 12px; 
-    text-align: center; 
-    font-weight: 700; 
-    font-size: 22px; 
-    margin-bottom: 15px; 
-    z-index: 100;
+    color: #fff; padding: 14px; border-radius: 12px; 
+    text-align: center; font-weight: 700; font-size: 22px; 
+    margin-bottom: 15px; z-index: 100;
     box-shadow: 0 6px 20px rgba(220,53,69,0.5);
     animation: timerPulse 1.5s infinite;
   }
@@ -503,26 +495,12 @@
   }
   
   .match-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-  .match-col { 
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 15px; 
-    border-radius: 12px;
-  }
-  .match-item { 
-    padding: 10px; 
-    background: #fff; 
-    border: 1px solid #ddd; 
-    border-radius: 8px; 
-    margin-bottom: 8px;
-  }
+  .match-col { background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px; border-radius: 12px; }
+  .match-item { padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; }
   
   .checkbox-label { 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    padding: 10px; 
-    cursor: pointer;
-    border-radius: 8px;
+    display: flex; align-items: center; gap: 8px; 
+    padding: 10px; cursor: pointer; border-radius: 8px;
     transition: all 0.3s;
   }
   .checkbox-label:hover { 
@@ -542,14 +520,11 @@
   .result-summary { 
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-    gap: 18px; 
-    margin-bottom: 22px; 
+    gap: 18px; margin-bottom: 22px; 
   }
   .result-card { 
     background: linear-gradient(135deg, #FF6B35, #EC4899); 
-    color: #fff; 
-    padding: 24px; 
-    border-radius: 18px; 
+    color: #fff; padding: 24px; border-radius: 18px; 
     text-align: center;
     box-shadow: 0 10px 30px rgba(255,107,53,0.4);
     transition: all 0.4s;
@@ -560,37 +535,26 @@
     60% { transform: scale(1.1); }
     100% { opacity: 1; transform: scale(1); }
   }
-  .result-card:hover {
-    transform: translateY(-8px) rotate(2deg);
-    box-shadow: 0 15px 40px rgba(255,107,53,0.6);
-  }
-  .result-card:nth-child(2) { background: linear-gradient(135deg, #1E3A8A, #3B82F6); box-shadow: 0 10px 30px rgba(30,58,138,0.4); }
-  .result-card:nth-child(3) { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; box-shadow: 0 10px 30px rgba(251,191,36,0.4); }
-  .result-card:nth-child(4) { background: linear-gradient(135deg, #EC4899, #BE185D); box-shadow: 0 10px 30px rgba(236,72,153,0.4); }
-  .result-card:nth-child(5) { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 10px 30px rgba(16,185,129,0.4); }
+  .result-card:hover { transform: translateY(-8px) rotate(2deg); }
+  .result-card:nth-child(2) { background: linear-gradient(135deg, #1E3A8A, #3B82F6); }
+  .result-card:nth-child(3) { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; }
+  .result-card:nth-child(4) { background: linear-gradient(135deg, #EC4899, #BE185D); }
+  .result-card:nth-child(5) { background: linear-gradient(135deg, #10B981, #059669); }
   
   .result-card .num { font-size: 40px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
   .result-card .lbl { font-size: 13px; opacity: 0.95; margin-top: 5px; font-weight: 600; }
   
   .hidden { display: none !important; }
   .spinner { 
-    border: 3px solid #f3f3f3; 
-    border-top: 3px solid #FF6B35; 
-    border-radius: 50%; 
-    width: 30px; 
-    height: 30px; 
-    animation: spin 1s linear infinite; 
-    margin: 0 auto 10px; 
+    border: 3px solid #f3f3f3; border-top: 3px solid #FF6B35; 
+    border-radius: 50%; width: 30px; height: 30px; 
+    animation: spin 1s linear infinite; margin: 0 auto 10px; 
   }
   
   .live-indicator { 
-    display: inline-block; 
-    width: 12px; 
-    height: 12px; 
-    background: #10B981; 
-    border-radius: 50%; 
-    margin-right: 5px; 
-    animation: pulseDot 1.5s infinite;
+    display: inline-block; width: 12px; height: 12px; 
+    background: #10B981; border-radius: 50%; 
+    margin-right: 5px; animation: pulseDot 1.5s infinite;
   }
   @keyframes pulseDot { 
     0%, 100% { opacity: 1; transform: scale(1); } 
@@ -599,63 +563,35 @@
   
   .sync-badge { 
     background: linear-gradient(135deg, #10B981, #059669); 
-    color: #fff; 
-    padding: 5px 14px; 
-    border-radius: 20px; 
-    font-size: 11px; 
-    font-weight: 700;
+    color: #fff; padding: 5px 14px; border-radius: 20px; 
+    font-size: 11px; font-weight: 700;
     box-shadow: 0 3px 10px rgba(16,185,129,0.4);
   }
-  .sync-badge.syncing { 
-    background: linear-gradient(135deg, #FBBF24, #F59E0B); 
-    color: #333;
-  }
+  .sync-badge.syncing { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; }
   
-  /* FLOATING BUTTON */
   .floating-add-btn {
-    position: fixed; 
-    bottom: 30px; 
-    right: 30px;
+    position: fixed; bottom: 110px; right: 30px;
     background: linear-gradient(135deg, #FF6B35, #EC4899);
     background-size: 200% 200%;
     animation: gradientBG 3s ease infinite;
-    color: #fff; 
-    border: none; 
-    border-radius: 50px;
-    padding: 18px 30px; 
-    font-size: 16px; 
-    font-weight: 700;
-    cursor: pointer; 
-    box-shadow: 0 10px 35px rgba(255,107,53,0.6);
-    z-index: 1000; 
-    transition: all 0.3s;
-    display: flex; 
-    align-items: center; 
-    gap: 8px;
+    color: #fff; border: none; border-radius: 50px;
+    padding: 18px 30px; font-size: 16px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 10px 35px rgba(255,107,53,0.6);
+    z-index: 999; transition: all 0.3s;
+    display: flex; align-items: center; gap: 8px;
   }
-  .floating-add-btn:hover { 
-    transform: translateY(-5px) scale(1.05); 
-    box-shadow: 0 15px 45px rgba(255,107,53,0.8);
-  }
-  .floating-add-btn:active {
-    transform: translateY(-2px) scale(1);
-  }
+  .floating-add-btn:hover { transform: translateY(-5px) scale(1.05); }
   
   .upload-progress {
     background: linear-gradient(135deg, #DBEAFE, #BFDBFE); 
-    border: 2px solid #3B82F6;
-    border-radius: 12px; 
-    padding: 12px; 
-    margin-top: 10px; 
-    font-size: 13px;
+    border: 2px solid #3B82F6; border-radius: 12px; 
+    padding: 12px; margin-top: 10px; font-size: 13px;
   }
   .progress-bar {
     background: linear-gradient(90deg, #FF6B35, #EC4899); 
     background-size: 200% 100%;
     animation: progressShimmer 2s ease infinite;
-    height: 12px; 
-    border-radius: 6px;
-    margin-top: 8px; 
+    height: 12px; border-radius: 6px; margin-top: 8px; 
     transition: width 0.3s;
   }
   @keyframes progressShimmer {
@@ -665,111 +601,73 @@
   
   .img-size-info {
     background: linear-gradient(135deg, #D1FAE5, #A7F3D0); 
-    border: 1px solid #10B981;
-    color: #065F46; 
-    padding: 8px 12px; 
-    border-radius: 8px;
-    font-size: 12px; 
-    margin-top: 5px;
+    border: 1px solid #10B981; color: #065F46; 
+    padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-top: 5px;
   }
   
-  /* ZOOM MODAL */
   .zoom-modal {
-    position: fixed;
-    top: 0; left: 0;
+    position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.92);
     z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     cursor: zoom-out;
     animation: zoomFadeIn 0.3s ease;
   }
-  @keyframes zoomFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+  @keyframes zoomFadeIn { from { opacity: 0; } to { opacity: 1; } }
   .zoom-modal img {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 90%; max-height: 90%;
     border-radius: 12px;
     box-shadow: 0 15px 60px rgba(0,0,0,0.7);
-    transition: transform 0.3s;
-    cursor: grab;
+    transition: transform 0.3s; cursor: grab;
   }
   .zoom-modal img:active { cursor: grabbing; }
   .zoom-controls {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
+    position: fixed; bottom: 30px; left: 50%;
     transform: translateX(-50%);
     background: rgba(255,255,255,0.97);
-    padding: 14px 22px;
-    border-radius: 50px;
-    display: flex;
-    gap: 12px;
+    padding: 14px 22px; border-radius: 50px;
+    display: flex; gap: 12px;
     box-shadow: 0 6px 25px rgba(0,0,0,0.4);
     z-index: 10000;
   }
   .zoom-btn {
-    width: 45px; height: 45px;
-    border-radius: 50%;
+    width: 45px; height: 45px; border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, #FF6B35, #EC4899);
-    color: #fff;
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
+    color: #fff; font-size: 22px; font-weight: bold;
+    cursor: pointer; transition: all 0.3s;
   }
-  .zoom-btn:hover {
-    transform: scale(1.15) rotate(10deg);
-  }
+  .zoom-btn:hover { transform: scale(1.15) rotate(10deg); }
   .zoom-close {
-    position: fixed;
-    top: 20px; right: 20px;
-    width: 55px; height: 55px;
-    border-radius: 50%;
+    position: fixed; top: 20px; right: 20px;
+    width: 55px; height: 55px; border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, #dc3545, #c82333);
-    color: #fff;
-    font-size: 26px;
-    cursor: pointer;
+    color: #fff; font-size: 26px; cursor: pointer;
     z-index: 10001;
     box-shadow: 0 6px 20px rgba(220,53,69,0.6);
     transition: all 0.3s;
   }
-  .zoom-close:hover {
-    transform: rotate(90deg) scale(1.1);
-  }
+  .zoom-close:hover { transform: rotate(90deg) scale(1.1); }
   .zoom-hint {
-    position: fixed;
-    top: 20px; left: 50%;
+    position: fixed; top: 20px; left: 50%;
     transform: translateX(-50%);
     background: rgba(255,255,255,0.97);
-    padding: 12px 22px;
-    border-radius: 30px;
-    font-size: 13px;
-    color: #1E3A8A;
-    font-weight: 600;
+    padding: 12px 22px; border-radius: 30px;
+    font-size: 13px; color: #1E3A8A; font-weight: 600;
     z-index: 10001;
     box-shadow: 0 6px 20px rgba(0,0,0,0.3);
   }
   
-  /* LOADING OVERLAY */
   .loading-overlay {
-    position: fixed;
-    top: 0; left: 0;
+    position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.75);
     backdrop-filter: blur(8px);
     z-index: 9998;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 22px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 22px;
     animation: fadeIn 0.3s ease;
   }
   .loading-overlay .spinner-big {
@@ -780,35 +678,105 @@
     animation: spin 1s linear infinite;
   }
   .loading-overlay .loading-text {
-    color: #fff;
-    font-size: 20px;
-    font-weight: 600;
+    color: #fff; font-size: 20px; font-weight: 600;
   }
   
   .logo-preview {
-    max-width: 150px;
-    max-height: 80px;
-    border-radius: 12px;
-    margin-top: 10px;
+    max-width: 150px; max-height: 80px;
+    border-radius: 12px; margin-top: 10px;
     border: 2px solid #e0e0e0;
   }
   
-  /* ACTION BUTTONS GROUP */
-  .action-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 10px;
+  .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .action-buttons .btn { padding: 6px 12px; font-size: 12px; }
+  
+  .import-zone {
+    border: 3px dashed #FF6B35;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+    transition: all 0.3s;
+    cursor: pointer;
   }
-  .action-buttons .btn {
-    padding: 6px 12px;
-    font-size: 12px;
+  .import-zone:hover {
+    border-color: #EC4899;
+    background: linear-gradient(135deg, #FDF2F8, #FCE7F3);
+    transform: translateY(-2px);
+  }
+  .import-zone.dragover {
+    border-color: #10B981;
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+  }
+  .import-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+    animation: bounce 2s ease infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .import-preview {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+  }
+  .import-preview-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+  }
+  .import-preview-item:last-child { border-bottom: none; }
+  
+  .format-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  .format-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .format-tab:hover {
+    border-color: #FF6B35;
+    transform: translateY(-2px);
+  }
+  .format-tab.active {
+    border-color: #FF6B35;
+    background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+    box-shadow: 0 4px 12px rgba(255,107,53,0.2);
+  }
+  .format-tab .format-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  .format-tab .format-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1E3A8A;
+  }
+  .format-tab .format-desc {
+    font-size: 11px;
+    color: #666;
+    margin-top: 3px;
   }
 </style>
 </head>
 <body>
 
-<!-- PARTICLES CONTAINER -->
 <div id="particles"></div>
 
 <div class="container">
@@ -822,14 +790,6 @@
   <div id="firebaseStatus" class="firebase-status">🔄 Menghubungkan ke Firebase...</div>
 
   <div id="teacherMode">
-    <div class="tabs">
-      <button class="tab active" onclick="showSection('dashboard', this)">🏠 Dashboard</button>
-      <button class="tab" onclick="showSection('create', this)">➕ Buat Kuis</button>
-      <button class="tab" onclick="showSection('list', this)">📋 Daftar Kuis</button>
-      <button class="tab" onclick="showSection('results', this)">📊 Hasil Siswa</button>
-      <button class="tab" onclick="showSection('settings', this)">⚙️ Pengaturan</button>
-    </div>
-
     <div class="content">
       <div id="dashboard" class="section active">
         <h2>🏠 Dashboard Guru <span class="sync-badge" id="syncBadge">🔴 Offline</span></h2>
@@ -844,14 +804,15 @@
           • Data kuis & hasil siswa: <b>Firebase Firestore</b> (Real-time)<br>
           • Upload gambar soal: <b>Cloudinary</b> (25GB gratis, CDN global)<br>
           • Export soal ke <b>Microsoft Word (DOCX)</b> untuk dicetak<br>
+          • Import soal dari <b>Excel, CSV, atau JSON</b><br>
           • Hasil siswa otomatis masuk dashboard guru dari device manapun!
         </div>
         <div class="alert alert-info">
           <strong>📌 Panduan Cepat:</strong><br>
-          1. Tab <b>Pengaturan</b> → upload logo sekolah & isi API keys (opsional)<br>
-          2. Tab <b>Buat Kuis</b> → buat kuis + upload gambar (otomatis ke Cloudinary)<br>
-          3. Tab <b>Daftar Kuis</b> → salin link, export DOCX, & share ke siswa<br>
-          4. Tab <b>Hasil Siswa</b> → lihat hasil real-time + export Excel
+          1. Menu <b>⚙️ Pengaturan</b> → upload logo sekolah & isi API keys<br>
+          2. Menu <b>➕ Buat Kuis</b> → buat/import kuis + upload gambar<br>
+          3. Menu <b>📋 Daftar Kuis</b> → salin link, export DOCX, share ke siswa<br>
+          4. Menu <b>📊 Hasil Siswa</b> → lihat hasil real-time + export Excel
         </div>
       </div>
 
@@ -886,6 +847,58 @@
             <label class="checkbox-label">
               <input type="checkbox" id="quizShuffle"> Acak urutan soal untuk setiap siswa
             </label>
+          </div>
+        </div>
+
+        <!-- IMPORT SOAL SECTION -->
+        <div class="quiz-card" style="background: linear-gradient(135deg, #FDF2F8, #FCE7F3);">
+          <h3>📥 Import Soal dari File</h3>
+          <div class="alert alert-info">
+            <strong>Format yang didukung:</strong><br>
+            • <b>Excel (.xlsx, .xls)</b> - Edit di Microsoft Excel, LibreOffice, Google Sheets<br>
+            • <b>CSV (.csv)</b> - Format teks sederhana, bisa dibuka di Excel<br>
+            • <b>JSON (.json)</b> - Backup dari aplikasi ini<br>
+            • Soal akan <b>ditambahkan</b> ke daftar soal yang sudah ada
+          </div>
+          
+          <!-- Format Tabs -->
+          <div class="format-tabs">
+            <div class="format-tab active" onclick="switchImportFormat('excel')">
+              <div class="format-icon">📊</div>
+              <div class="format-name">Excel</div>
+              <div class="format-desc">.xlsx, .xls</div>
+            </div>
+            <div class="format-tab" onclick="switchImportFormat('csv')">
+              <div class="format-icon">📄</div>
+              <div class="format-name">CSV</div>
+              <div class="format-desc">.csv</div>
+            </div>
+            <div class="format-tab" onclick="switchImportFormat('json')">
+              <div class="format-icon">📋</div>
+              <div class="format-name">JSON</div>
+              <div class="format-desc">.json</div>
+            </div>
+          </div>
+          
+          <div class="import-zone" id="importZone" onclick="document.getElementById('importQuestionsFile').click()">
+            <div class="import-icon">📂</div>
+            <h4 style="color:#1E3A8A;margin-bottom:8px;">Klik atau Drag & Drop File di Sini</h4>
+            <p style="color:#666;font-size:13px;" id="importFormatHint">Format: Excel (.xlsx, .xls) atau CSV (.csv)</p>
+            <input type="file" id="importQuestionsFile" accept=".xlsx,.xls,.csv,.json" style="display:none" onchange="handleImportQuestions(event)">
+          </div>
+          
+          <div style="margin-top:15px;">
+            <button class="btn btn-info" onclick="downloadTemplate()" style="width:100%;">
+              📥 Download Template Excel/CSV (Contoh Format)
+            </button>
+          </div>
+          
+          <div id="importPreview" class="hidden">
+            <div class="import-preview" id="importPreviewContent"></div>
+            <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-success" onclick="confirmImportQuestions()">✅ Tambahkan Soal yang Diimport</button>
+              <button class="btn btn-danger" onclick="cancelImportQuestions()">❌ Batal</button>
+            </div>
           </div>
         </div>
 
@@ -926,7 +939,7 @@
         </div>
 
         <div class="quiz-card">
-          <h3>📋 Daftar Soal</h3>
+          <h3>📋 Daftar Soal <span id="questionCount" style="color:#FF6B35;font-size:14px;">(0 soal)</span></h3>
           <div id="questionsList"></div>
         </div>
 
@@ -957,9 +970,7 @@
         
         <div class="quiz-card">
           <h3>🏫 Logo Sekolah</h3>
-          <div class="alert alert-info">
-            Upload logo sekolah Anda. Logo akan muncul di header aplikasi dan halaman kuis siswa.
-          </div>
+          <div class="alert alert-info">Upload logo sekolah Anda. Logo akan muncul di header aplikasi dan halaman kuis siswa.</div>
           <div class="form-group">
             <label>Upload Logo (JPG/PNG, maks 500KB):</label>
             <input type="file" id="logoUpload" accept="image/*" onchange="handleLogoUpload(event)">
@@ -1042,6 +1053,32 @@
   </div>
 </div>
 
+<!-- BOTTOM FLOATING NAVIGATION -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" onclick="showSection('dashboard', this)" data-section="dashboard">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Dashboard</span>
+  </button>
+  <button class="nav-item" onclick="showSection('create', this)" data-section="create">
+    <span class="nav-icon">➕</span>
+    <span class="nav-label">Buat Kuis</span>
+  </button>
+  <button class="nav-item" onclick="showSection('list', this)" data-section="list">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Daftar</span>
+    <span class="nav-badge hidden" id="quizCountBadge">0</span>
+  </button>
+  <button class="nav-item" onclick="showSection('results', this)" data-section="results">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Hasil</span>
+    <span class="nav-badge hidden" id="resultCountBadge">0</span>
+  </button>
+  <button class="nav-item" onclick="showSection('settings', this)" data-section="settings">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">Setting</span>
+  </button>
+</nav>
+
 <button class="floating-add-btn hidden" id="floatingAddBtn" onclick="addQuestion()">
   ➕ Tambah Soal
 </button>
@@ -1096,6 +1133,8 @@ let state = {
   schoolLogo: localStorage.getItem('schoolLogo') || '',
   editingQuizId: null,
   currentQuestions: [],
+  pendingImportQuestions: [],
+  currentImportFormat: 'excel',
   unsubscribers: []
 };
 
@@ -1103,7 +1142,6 @@ let state = {
 function createParticles() {
   const container = document.getElementById('particles');
   const colors = ['#FF6B35', '#1E3A8A', '#FBBF24', '#EC4899', '#10B981'];
-  
   for (let i = 0; i < 20; i++) {
     const particle = document.createElement('div');
     particle.className = 'particle';
@@ -1126,6 +1164,7 @@ window.addEventListener('load', () => {
   applySchoolLogo();
   checkURLMode();
   setupFirebaseListeners();
+  setupDragDropImport();
 });
 
 function setupFirebaseListeners() {
@@ -1135,6 +1174,7 @@ function setupFirebaseListeners() {
     state.quizzes = [];
     snapshot.forEach(doc => state.quizzes.push({ id: doc.id, ...doc.data() }));
     updateDashboard();
+    updateNavBadges();
     if (document.getElementById('list').classList.contains('active')) renderQuizList();
     if (document.getElementById('results').classList.contains('active')) loadResultQuizOptions();
     statusEl.textContent = '✅ Terhubung ke Firebase | Cloudinary: rbxpbias';
@@ -1151,10 +1191,30 @@ function setupFirebaseListeners() {
     state.results = [];
     snapshot.forEach(doc => state.results.push({ id: doc.id, ...doc.data() }));
     updateDashboard();
+    updateNavBadges();
     if (document.getElementById('results').classList.contains('active')) loadResults();
   }, error => console.error('Results error:', error));
   
   state.unsubscribers = [unsubQuizzes, unsubResults];
+}
+
+function updateNavBadges() {
+  const quizBadge = document.getElementById('quizCountBadge');
+  const resultBadge = document.getElementById('resultCountBadge');
+  
+  if (state.quizzes.length > 0) {
+    quizBadge.textContent = state.quizzes.length;
+    quizBadge.classList.remove('hidden');
+  } else {
+    quizBadge.classList.add('hidden');
+  }
+  
+  if (state.results.length > 0) {
+    resultBadge.textContent = state.results.length;
+    resultBadge.classList.remove('hidden');
+  } else {
+    resultBadge.classList.add('hidden');
+  }
 }
 
 function updateSyncBadges(online) {
@@ -1174,8 +1234,10 @@ function checkURLMode() {
         clearInterval(checkInterval);
         document.getElementById('teacherMode').classList.add('hidden');
         document.getElementById('firebaseStatus').classList.add('hidden');
+        document.getElementById('bottomNav').classList.add('hidden');
         document.getElementById('floatingAddBtn').classList.add('hidden');
         document.getElementById('studentMode').classList.remove('hidden');
+        document.body.style.paddingBottom = '20px';
         startStudentMode(quiz);
       }
     }, 500);
@@ -1209,9 +1271,15 @@ function applySchoolLogo() {
 
 function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
+  
+  if (btn && btn.classList.contains('nav-item')) {
+    btn.classList.add('active');
+  } else {
+    const navBtn = document.querySelector(`.nav-item[data-section="${id}"]`);
+    if (navBtn) navBtn.classList.add('active');
+  }
   
   const floatingBtn = document.getElementById('floatingAddBtn');
   if (id === 'create') floatingBtn.classList.remove('hidden');
@@ -1220,18 +1288,18 @@ function showSection(id, btn) {
   if (id === 'list') renderQuizList();
   if (id === 'results') loadResultQuizOptions();
   if (id === 'dashboard') updateDashboard();
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ==================== LOGO MANAGEMENT ====================
 function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-  
   if (file.size > 500 * 1024) {
     alert('⚠️ Ukuran logo maksimal 500KB!\n\nFile Anda: ' + (file.size/1024).toFixed(0) + 'KB');
     return;
   }
-  
   const reader = new FileReader();
   reader.onload = e => {
     state.schoolLogo = e.target.result;
@@ -1243,10 +1311,7 @@ function handleLogoUpload(event) {
 }
 
 function removeLogo() {
-  if (!state.schoolLogo) {
-    alert('Tidak ada logo yang perlu dihapus.');
-    return;
-  }
+  if (!state.schoolLogo) { alert('Tidak ada logo yang perlu dihapus.'); return; }
   if (confirm('Hapus logo sekolah?')) {
     state.schoolLogo = '';
     localStorage.removeItem('schoolLogo');
@@ -1262,7 +1327,6 @@ function showLoading(text = 'Memproses...') {
   document.getElementById('loadingText').textContent = text;
   document.getElementById('loadingOverlay').classList.remove('hidden');
 }
-
 function hideLoading() {
   document.getElementById('loadingOverlay').classList.add('hidden');
 }
@@ -1421,16 +1485,313 @@ function removeMatchPair(qIdx, pIdx) {
   renderQuestions();
 }
 
+// ==================== IMPORT FORMAT SWITCHER ====================
+function switchImportFormat(format) {
+  state.currentImportFormat = format;
+  document.querySelectorAll('.format-tab').forEach(tab => tab.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  const hint = document.getElementById('importFormatHint');
+  const fileInput = document.getElementById('importQuestionsFile');
+  
+  if (format === 'excel') {
+    hint.textContent = 'Format: Excel (.xlsx, .xls) atau CSV (.csv)';
+    fileInput.accept = '.xlsx,.xls,.csv';
+  } else if (format === 'csv') {
+    hint.textContent = 'Format: CSV (.csv) - bisa dibuat dari Excel';
+    fileInput.accept = '.csv';
+  } else if (format === 'json') {
+    hint.textContent = 'Format: JSON (.json) - backup dari aplikasi';
+    fileInput.accept = '.json';
+  }
+}
+
+// ==================== DOWNLOAD TEMPLATE ====================
+function downloadTemplate() {
+  const templateData = [
+    ['Jenis Soal', 'Pertanyaan', 'Opsi A', 'Opsi B', 'Opsi C', 'Opsi D', 'Jawaban Benar', 'Bobot Nilai'],
+    ['pg', 'Berapa hasil 2 + 2?', '3', '4', '5', '6', 'B', '10'],
+    ['pg', 'Ibu kota Indonesia adalah?', 'Bandung', 'Jakarta', 'Surabaya', 'Medan', 'B', '10'],
+    ['bs', 'Bumi berbentuk datar', '', '', '', '', 'Salah', '5'],
+    ['esai', 'Jelaskan proses fotosintesis!', '', '', '', '', 'Proses tumbuhan membuat makanan', '15'],
+    ['multi', 'Manakah yang termasuk buah? (pilih semua)', 'Apel', 'Wortel', 'Pisang', 'Kentang', 'A,C', '10']
+  ];
+  
+  const ws = XLSX.utils.aoa_to_sheet(templateData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Template Soal');
+  
+  // Tambah sheet panduan
+  const guideData = [
+    ['PANDUAN FORMAT IMPORT SOAL'],
+    [''],
+    ['KOLOM A - Jenis Soal:'],
+    ['pg = Pilihan Ganda (1 jawaban benar)'],
+    ['bs = Benar/Salah'],
+    ['esai = Esai (jawaban panjang)'],
+    ['multi = Jawaban Lebih dari Satu'],
+    ['match = Pencocokan (belum support via Excel)'],
+    [''],
+    ['KOLOM B - Pertanyaan:'],
+    ['Tulis pertanyaan soal di sini'],
+    [''],
+    ['KOLOM C-F - Opsi A, B, C, D:'],
+    ['Untuk soal PG dan Multi, isi opsi jawaban'],
+    ['Untuk soal BS dan Esai, bisa dikosongkan'],
+    [''],
+    ['KOLOM G - Jawaban Benar:'],
+    ['Untuk PG: isi A, B, C, atau D'],
+    ['Untuk BS: isi "Benar" atau "Salah"'],
+    ['Untuk Multi: isi kombinasi, contoh "A,C" atau "A,B,D"'],
+    ['Untuk Esai: isi kunci jawaban (opsional)'],
+    [''],
+    ['KOLOM H - Bobot Nilai:'],
+    ['Angka nilai untuk soal tersebut (default: 10)'],
+    [''],
+    ['CONTOH PENGGUNAAN:'],
+    ['1. Download template ini'],
+    ['2. Edit di Excel/Google Sheets'],
+    ['3. Simpan sebagai .xlsx atau .csv'],
+    ['4. Import ke aplikasi kuis'],
+    ['5. Soal otomatis masuk ke daftar!']
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(guideData);
+  XLSX.utils.book_append_sheet(wb, ws2, 'Panduan');
+  
+  XLSX.writeFile(wb, 'Template_Import_Soal.xlsx');
+  alert('✅ Template Excel berhasil didownload!\n\nBuka file tersebut di Excel/Google Sheets, edit soal Anda, lalu import kembali.');
+}
+
+// ==================== IMPORT QUESTIONS ====================
+function setupDragDropImport() {
+  const zone = document.getElementById('importZone');
+  if (!zone) return;
+  
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.classList.add('dragover');
+  });
+  
+  zone.addEventListener('dragleave', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+  });
+  
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      processImportFile(file);
+    } else {
+      alert('⚠️ File tidak valid!');
+    }
+  });
+}
+
+function handleImportQuestions(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  processImportFile(file);
+  event.target.value = '';
+}
+
+function processImportFile(file) {
+  const fileName = file.name.toLowerCase();
+  const extension = fileName.split('.').pop();
+  
+  if (extension === 'json') {
+    processJSONImport(file);
+  } else if (['xlsx', 'xls', 'csv'].includes(extension)) {
+    processExcelImport(file, extension);
+  } else {
+    alert('⚠️ Format file tidak didukung!\n\nGunakan: .xlsx, .xls, .csv, atau .json');
+  }
+}
+
+function processJSONImport(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      let questions = [];
+      
+      if (Array.isArray(data)) {
+        questions = data;
+      } else if (data.questions && Array.isArray(data.questions)) {
+        questions = data.questions;
+      } else if (data.title && data.questions) {
+        questions = data.questions;
+      } else {
+        throw new Error('Format file tidak dikenali.');
+      }
+      
+      const validQuestions = questions.filter(q => {
+        if (!q.type || !['pg', 'bs', 'esai', 'match', 'multi'].includes(q.type)) return false;
+        if (!q.text || !q.text.trim()) return false;
+        return true;
+      });
+      
+      if (validQuestions.length === 0) {
+        throw new Error('Tidak ada soal valid yang ditemukan.');
+      }
+      
+      state.pendingImportQuestions = validQuestions.map(q => ({
+        ...q,
+        id: 'q_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        weight: q.weight || 10
+      }));
+      
+      showImportPreview(state.pendingImportQuestions);
+    } catch (err) {
+      alert('❌ Gagal memproses file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function processExcelImport(file, extension) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+      
+      if (jsonData.length < 2) {
+        throw new Error('File Excel kosong atau hanya ada header.');
+      }
+      
+      // Skip header row
+      const rows = jsonData.slice(1);
+      const questions = [];
+      
+      rows.forEach((row, idx) => {
+        if (!row || row.length === 0) return;
+        
+        const type = (row[0] || '').toString().trim().toLowerCase();
+        const text = (row[1] || '').toString().trim();
+        
+        if (!type || !text) return;
+        
+        const validTypes = ['pg', 'bs', 'esai', 'multi', 'pilihan ganda', 'benar salah', 'benar/salah', 'esai', 'jawaban lebih dari satu'];
+        if (!validTypes.includes(type)) return;
+        
+        // Normalize type
+        let normalizedType = type;
+        if (type === 'pilihan ganda') normalizedType = 'pg';
+        else if (type === 'benar salah' || type === 'benar/salah') normalizedType = 'bs';
+        else if (type === 'jawaban lebih dari satu') normalizedType = 'multi';
+        
+        const optionA = (row[2] || '').toString().trim();
+        const optionB = (row[3] || '').toString().trim();
+        const optionC = (row[4] || '').toString().trim();
+        const optionD = (row[5] || '').toString().trim();
+        const correctAnswer = (row[6] || '').toString().trim();
+        const weight = parseInt(row[7]) || 10;
+        
+        const question = {
+          id: 'q_import_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).substr(2, 5),
+          type: normalizedType,
+          text: text,
+          weight: weight,
+          image: ''
+        };
+        
+        if (normalizedType === 'pg') {
+          const correctLetter = correctAnswer.toUpperCase();
+          question.options = [
+            {text: optionA, correct: correctLetter === 'A'},
+            {text: optionB, correct: correctLetter === 'B'},
+            {text: optionC, correct: correctLetter === 'C'},
+            {text: optionD, correct: correctLetter === 'D'}
+          ].filter(o => o.text); // Remove empty options
+        } else if (normalizedType === 'bs') {
+          question.correctBool = correctAnswer.toLowerCase() === 'benar';
+        } else if (normalizedType === 'esai') {
+          question.essayAnswer = correctAnswer;
+        } else if (normalizedType === 'multi') {
+          const correctLetters = correctAnswer.toUpperCase().split(',').map(l => l.trim());
+          question.options = [
+            {text: optionA, correct: correctLetters.includes('A')},
+            {text: optionB, correct: correctLetters.includes('B')},
+            {text: optionC, correct: correctLetters.includes('C')},
+            {text: optionD, correct: correctLetters.includes('D')}
+          ].filter(o => o.text);
+        }
+        
+        questions.push(question);
+      });
+      
+      if (questions.length === 0) {
+        throw new Error('Tidak ada soal valid yang ditemukan. Pastikan format sesuai template.');
+      }
+      
+      state.pendingImportQuestions = questions;
+      showImportPreview(questions);
+    } catch (err) {
+      alert('❌ Gagal memproses file Excel/CSV: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showImportPreview(questions) {
+  const preview = document.getElementById('importPreview');
+  const content = document.getElementById('importPreviewContent');
+  const typeNames = {pg: 'Pilihan Ganda', bs: 'Benar/Salah', esai: 'Esai', match: 'Pencocokan', multi: 'Jawaban Lebih dari Satu'};
+  
+  content.innerHTML = `
+    <div style="padding:10px;background:#D1FAE5;border-radius:8px;margin-bottom:10px;">
+      <strong>✅ Ditemukan ${questions.length} soal valid</strong> yang akan ditambahkan ke daftar soal.
+    </div>
+    ${questions.map((q, idx) => `
+      <div class="import-preview-item">
+        <strong>Soal ${idx+1}</strong> 
+        <span class="badge badge-${q.type}" style="font-size:10px;">${typeNames[q.type] || q.type}</span>
+        <span style="color:#666;font-size:11px;">(${q.weight || 10} poin)</span><br>
+        <span style="color:#333;">${escapeHtml(q.text.substring(0, 100))}${q.text.length > 100 ? '...' : ''}</span>
+      </div>
+    `).join('')}
+  `;
+  
+  preview.classList.remove('hidden');
+  preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function confirmImportQuestions() {
+  if (state.pendingImportQuestions.length === 0) {
+    alert('Tidak ada soal untuk diimport.');
+    return;
+  }
+  
+  state.currentQuestions = [...state.currentQuestions, ...state.pendingImportQuestions];
+  const count = state.pendingImportQuestions.length;
+  state.pendingImportQuestions = [];
+  
+  document.getElementById('importPreview').classList.add('hidden');
+  renderQuestions();
+  
+  alert(`✅ Berhasil mengimport ${count} soal!\n\nSoal telah ditambahkan ke daftar. Silakan tinjau dan edit jika perlu sebelum menyimpan kuis.`);
+  
+  document.getElementById('questionsList').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelImportQuestions() {
+  state.pendingImportQuestions = [];
+  document.getElementById('importPreview').classList.add('hidden');
+  document.getElementById('importQuestionsFile').value = '';
+}
+
 // ==================== CLOUDINARY UPLOAD ====================
 async function handleImageUpload(event, qIdx) {
   const file = event.target.files[0];
   if (!file) return;
-  
   if (file.size > 10 * 1024 * 1024) {
-    alert('⚠️ Ukuran file terlalu besar! Maksimal 10MB.\n\nFile Anda: ' + (file.size / 1024 / 1024).toFixed(2) + 'MB');
+    alert('⚠️ Ukuran file terlalu besar! Maksimal 10MB.');
     return;
   }
-  
   const progressDiv = document.createElement('div');
   progressDiv.className = 'upload-progress';
   progressDiv.innerHTML = '<div>⏳ Mengupload ke Cloudinary... 0%</div><div class="progress-bar" style="width: 0%"></div>';
@@ -1443,27 +1804,21 @@ async function handleImageUpload(event, qIdx) {
   
   try {
     const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`, {
-      method: 'POST',
-      body: formData
+      method: 'POST', body: formData
     });
-    
     const result = await response.json();
-    
     if (result.error) {
       progressDiv.remove();
       alert('❌ Upload gagal: ' + result.error.message);
       return;
     }
-    
     progressDiv.innerHTML = '<div>⏳ Mengupload ke Cloudinary... 100%</div><div class="progress-bar" style="width: 100%"></div>';
-    
     setTimeout(() => {
       progressDiv.remove();
       state.currentQuestions[qIdx].image = result.secure_url;
       renderQuestions();
-      alert('✅ Gambar berhasil diupload ke Cloudinary!\n\nUkuran: ' + (result.bytes/1024).toFixed(0) + ' KB');
+      alert('✅ Gambar berhasil diupload!\n\nUkuran: ' + (result.bytes/1024).toFixed(0) + ' KB');
     }, 500);
-    
   } catch (err) {
     progressDiv.remove();
     alert('❌ Error upload: ' + err.message);
@@ -1477,8 +1832,11 @@ function removeImage(qIdx) {
 
 function renderQuestions() {
   const container = document.getElementById('questionsList');
+  const countEl = document.getElementById('questionCount');
+  if (countEl) countEl.textContent = `(${state.currentQuestions.length} soal)`;
+  
   if (state.currentQuestions.length === 0) {
-    container.innerHTML = '<div class="alert alert-warning">Belum ada soal. Klik tombol "➕ Tambah Soal" di kanan bawah untuk mulai.</div>';
+    container.innerHTML = '<div class="alert alert-warning">Belum ada soal. Klik tombol "➕ Tambah Soal" atau import dari file untuk mulai.</div>';
     return;
   }
   
@@ -1487,7 +1845,6 @@ function renderQuestions() {
   
   container.innerHTML = state.currentQuestions.map((q, idx) => {
     let body = '';
-    
     if (q.type === 'pg' || q.type === 'multi') {
       body = `
         <div><strong>Opsi Jawaban:</strong> ${q.type === 'multi' ? '<span style="color:#c62828;font-size:12px;">(centang semua yang benar)</span>' : '<span style="color:#1976d2;font-size:12px;">(centang 1 yang benar)</span>'}</div>
@@ -1509,7 +1866,7 @@ function renderQuestions() {
     } else if (q.type === 'esai') {
       body = `
         <div><strong>Kunci Jawaban / Pedoman Penilaian:</strong></div>
-        <textarea placeholder="Tulis kunci jawaban atau poin-poin penilaian..." onchange="updateQuestion(${idx}, 'essayAnswer', this.value)">${escapeHtml(q.essayAnswer || '')}</textarea>
+        <textarea placeholder="Tulis kunci jawaban..." onchange="updateQuestion(${idx}, 'essayAnswer', this.value)">${escapeHtml(q.essayAnswer || '')}</textarea>
       `;
     } else if (q.type === 'match') {
       body = `
@@ -1558,14 +1915,14 @@ function renderQuestions() {
           </div>
         </div>
         <div class="form-group">
-          <label>Gambar Soal (opsional, upload ke Cloudinary - 25GB gratis):</label>
+          <label>Gambar Soal (opsional, upload ke Cloudinary):</label>
           <input type="file" accept="image/*" onchange="handleImageUpload(event, ${idx})">
           ${hasImage ? `
             <div>
               <img src="${q.image}" class="img-preview" onclick="openZoom('${q.image}')" title="Klik untuk zoom">
               <br>
               <button class="btn btn-danger" style="padding:3px 8px;font-size:11px;margin-top:5px;" onclick="removeImage(${idx})">Hapus Gambar</button>
-              <div class="img-size-info">✅ Tersimpan di Cloudinary (CDN Global) • 🔍 Klik gambar untuk zoom</div>
+              <div class="img-size-info">✅ Tersimpan di Cloudinary • 🔍 Klik gambar untuk zoom</div>
             </div>
           ` : ''}
         </div>
@@ -1599,20 +1956,9 @@ function closeZoom(event) {
   resetZoom();
 }
 
-function zoomIn() {
-  zoomState.scale = Math.min(zoomState.scale + 0.25, 5);
-  applyZoom();
-}
-
-function zoomOut() {
-  zoomState.scale = Math.max(zoomState.scale - 0.25, 0.25);
-  applyZoom();
-}
-
-function resetZoom() {
-  zoomState = { scale: 1, x: 0, y: 0, isDragging: false, startX: 0, startY: 0 };
-  applyZoom();
-}
+function zoomIn() { zoomState.scale = Math.min(zoomState.scale + 0.25, 5); applyZoom(); }
+function zoomOut() { zoomState.scale = Math.max(zoomState.scale - 0.25, 0.25); applyZoom(); }
+function resetZoom() { zoomState = { scale: 1, x: 0, y: 0, isDragging: false, startX: 0, startY: 0 }; applyZoom(); }
 
 function applyZoom() {
   const img = document.getElementById('zoomImage');
@@ -1622,7 +1968,6 @@ function applyZoom() {
 document.addEventListener('DOMContentLoaded', () => {
   const img = document.getElementById('zoomImage');
   if (!img) return;
-  
   img.addEventListener('mousedown', e => {
     if (zoomState.scale > 1) {
       zoomState.isDragging = true;
@@ -1631,7 +1976,6 @@ document.addEventListener('DOMContentLoaded', () => {
       img.style.cursor = 'grabbing';
     }
   });
-  
   document.addEventListener('mousemove', e => {
     if (zoomState.isDragging) {
       zoomState.x = e.clientX - zoomState.startX;
@@ -1639,17 +1983,8 @@ document.addEventListener('DOMContentLoaded', () => {
       applyZoom();
     }
   });
-  
-  document.addEventListener('mouseup', () => {
-    zoomState.isDragging = false;
-    img.style.cursor = 'grab';
-  });
-  
-  img.addEventListener('wheel', e => {
-    e.preventDefault();
-    if (e.deltaY < 0) zoomIn();
-    else zoomOut();
-  });
+  document.addEventListener('mouseup', () => { zoomState.isDragging = false; img.style.cursor = 'grab'; });
+  img.addEventListener('wheel', e => { e.preventDefault(); if (e.deltaY < 0) zoomIn(); else zoomOut(); });
 });
 
 document.addEventListener('keydown', e => {
@@ -1662,138 +1997,84 @@ document.addEventListener('keydown', e => {
 function exportToDocx(quizId) {
   const quiz = state.quizzes.find(q => q.id === quizId);
   if (!quiz) return;
-  
   showLoading('Membuat dokumen Word...');
   
-  // Build HTML content for DOCX
-  let html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6; margin: 2cm; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #000; padding-bottom: 15px; }
-        .header h1 { font-size: 18pt; margin: 0; }
-        .header h2 { font-size: 14pt; margin: 5px 0; font-weight: normal; }
-        .info { margin: 20px 0; padding: 10px; background: #f5f5f5; border-left: 4px solid #333; }
-        .question { margin: 20px 0; page-break-inside: avoid; }
-        .question-number { font-weight: bold; font-size: 13pt; margin-bottom: 8px; }
-        .question-text { margin-bottom: 10px; white-space: pre-wrap; }
-        .question-image { max-width: 400px; margin: 10px 0; }
-        .options { margin-left: 20px; }
-        .option { margin: 5px 0; }
-        .answer-key { margin-top: 30px; page-break-before: always; border-top: 2px solid #000; padding-top: 20px; }
-        .answer-key h2 { font-size: 16pt; text-align: center; }
-        .answer-item { margin: 8px 0; padding: 5px; background: #ffffcc; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        table td, table th { border: 1px solid #000; padding: 8px; }
-        .footer { text-align: center; margin-top: 30px; font-size: 10pt; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>${escapeHtml(quiz.title)}</h1>
-        <h2>Mata Pelajaran: ${escapeHtml(quiz.subject)}</h2>
-        ${quiz.description ? `<p>${escapeHtml(quiz.description)}</p>` : ''}
-      </div>
-      
-      <div class="info">
-        <table>
-          <tr><td><strong>Nama:</strong></td><td>.......................................................</td></tr>
-          <tr><td><strong>Kelas:</strong></td><td>.......................................................</td></tr>
-          <tr><td><strong>NIS:</strong></td><td>.......................................................</td></tr>
-          <tr><td><strong>Hari/Tanggal:</strong></td><td>.......................................................</td></tr>
-          <tr><td><strong>Durasi:</strong></td><td>${quiz.duration > 0 ? quiz.duration + ' menit' : 'Tanpa batas'}</td></tr>
-        </table>
-      </div>
-      
-      <h3 style="text-align:center; margin: 25px 0;">SOAL</h3>
-  `;
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6; margin: 2cm; }
+    .header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #000; padding-bottom: 15px; }
+    .header h1 { font-size: 18pt; margin: 0; }
+    .header h2 { font-size: 14pt; margin: 5px 0; font-weight: normal; }
+    .info { margin: 20px 0; padding: 10px; background: #f5f5f5; border-left: 4px solid #333; }
+    .question { margin: 20px 0; page-break-inside: avoid; }
+    .question-number { font-weight: bold; font-size: 13pt; margin-bottom: 8px; }
+    .question-text { margin-bottom: 10px; white-space: pre-wrap; }
+    .question-image { max-width: 400px; margin: 10px 0; }
+    .options { margin-left: 20px; }
+    .option { margin: 5px 0; }
+    .answer-key { margin-top: 30px; page-break-before: always; border-top: 2px solid #000; padding-top: 20px; }
+    .answer-key h2 { font-size: 16pt; text-align: center; }
+    .answer-item { margin: 8px 0; padding: 5px; background: #ffffcc; }
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    table td, table th { border: 1px solid #000; padding: 8px; }
+    .footer { text-align: center; margin-top: 30px; font-size: 10pt; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
+  </style></head><body>
+    <div class="header">
+      <h1>${escapeHtml(quiz.title)}</h1>
+      <h2>Mata Pelajaran: ${escapeHtml(quiz.subject)}</h2>
+      ${quiz.description ? `<p>${escapeHtml(quiz.description)}</p>` : ''}
+    </div>
+    <div class="info"><table>
+      <tr><td><strong>Nama:</strong></td><td>.......................................................</td></tr>
+      <tr><td><strong>Kelas:</strong></td><td>.......................................................</td></tr>
+      <tr><td><strong>NIS:</strong></td><td>.......................................................</td></tr>
+      <tr><td><strong>Hari/Tanggal:</strong></td><td>.......................................................</td></tr>
+      <tr><td><strong>Durasi:</strong></td><td>${quiz.duration > 0 ? quiz.duration + ' menit' : 'Tanpa batas'}</td></tr>
+    </table></div>
+    <h3 style="text-align:center; margin: 25px 0;">SOAL</h3>`;
   
   (quiz.questions || []).forEach((q, idx) => {
     html += `<div class="question">`;
     html += `<div class="question-number">Soal ${idx + 1} (${q.weight} poin) <span style="font-weight:normal;font-size:11pt;">[${getTypeName(q.type)}]</span></div>`;
     html += `<div class="question-text">${escapeHtml(q.text)}</div>`;
-    
-    if (q.image) {
-      html += `<img src="${q.image}" class="question-image"><br>`;
-    }
-    
+    if (q.image) html += `<img src="${q.image}" class="question-image"><br>`;
     if (q.type === 'pg' || q.type === 'multi') {
       html += `<div class="options">`;
-      q.options.forEach((opt, oIdx) => {
-        html += `<div class="option"><strong>${String.fromCharCode(65+oIdx)}.</strong> ${escapeHtml(opt.text)}</div>`;
-      });
+      q.options.forEach((opt, oIdx) => { html += `<div class="option"><strong>${String.fromCharCode(65+oIdx)}.</strong> ${escapeHtml(opt.text)}</div>`; });
       html += `</div>`;
     } else if (q.type === 'bs') {
-      html += `<div class="options">
-        <div class="option">○ Benar</div>
-        <div class="option">○ Salah</div>
-      </div>`;
+      html += `<div class="options"><div class="option">○ Benar</div><div class="option">○ Salah</div></div>`;
     } else if (q.type === 'esai') {
       html += `<div style="border: 1px solid #ccc; min-height: 100px; margin-top: 10px; padding: 10px;">Jawaban: </div>`;
     } else if (q.type === 'match') {
       html += `<table><tr><th>Pernyataan</th><th>Pasangan</th></tr>`;
-      q.matchPairs.forEach(p => {
-        html += `<tr><td>${escapeHtml(p.left)}</td><td>....................</td></tr>`;
-      });
+      q.matchPairs.forEach(p => { html += `<tr><td>${escapeHtml(p.left)}</td><td>....................</td></tr>`; });
       html += `</table>`;
     }
-    
     html += `</div>`;
   });
   
-  // Answer Key Section
-  html += `<div class="answer-key">
-    <h2>KUNCI JAWABAN</h2>
-    <p style="text-align:center;font-size:10pt;">(Hanya untuk guru)</p>
-  `;
-  
+  html += `<div class="answer-key"><h2>KUNCI JAWABAN</h2><p style="text-align:center;font-size:10pt;">(Hanya untuk guru)</p>`;
   (quiz.questions || []).forEach((q, idx) => {
     let answer = '';
-    if (q.type === 'pg') {
-      const correct = q.options.find(o => o.correct);
-      answer = correct ? String.fromCharCode(65 + q.options.indexOf(correct)) : '-';
-    } else if (q.type === 'multi') {
-      answer = q.options.filter(o => o.correct).map(o => String.fromCharCode(65 + q.options.indexOf(o))).join(', ');
-    } else if (q.type === 'bs') {
-      answer = q.correctBool ? 'Benar' : 'Salah';
-    } else if (q.type === 'esai') {
-      answer = q.essayAnswer || '(Dinilai manual)';
-    } else if (q.type === 'match') {
-      answer = q.matchPairs.map(p => `${p.left} → ${p.right}`).join('; ');
-    }
-    
+    if (q.type === 'pg') { const correct = q.options.find(o => o.correct); answer = correct ? String.fromCharCode(65 + q.options.indexOf(correct)) : '-'; }
+    else if (q.type === 'multi') { answer = q.options.filter(o => o.correct).map(o => String.fromCharCode(65 + q.options.indexOf(o))).join(', '); }
+    else if (q.type === 'bs') { answer = q.correctBool ? 'Benar' : 'Salah'; }
+    else if (q.type === 'esai') { answer = q.essayAnswer || '(Dinilai manual)'; }
+    else if (q.type === 'match') { answer = q.matchPairs.map(p => `${p.left} → ${p.right}`).join('; '); }
     html += `<div class="answer-item"><strong>Soal ${idx+1}:</strong> ${escapeHtml(answer)}</div>`;
   });
+  html += `</div><div class="footer">Dokumen dibuat dengan Aplikasi Kuis SMKN 2 Dompu | ${new Date().toLocaleDateString('id-ID')}</div></body></html>`;
   
-  html += `</div>`;
-  html += `<div class="footer">Dokumen dibuat dengan Aplikasi Kuis SMKN 2 Dompu | ${new Date().toLocaleDateString('id-ID')}</div>`;
-  html += `</body></html>`;
-  
-  // Convert to DOCX using html-docx-js
   try {
-    const converted = htmlDocx.asBlob(html, {
-      orientation: 'portrait',
-      margins: { top: 720, bottom: 720, left: 1080, right: 1080 }
-    });
-    
+    const converted = htmlDocx.asBlob(html, { orientation: 'portrait', margins: { top: 720, bottom: 720, left: 1080, right: 1080 } });
     const url = URL.createObjectURL(converted);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${quiz.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.href = url; a.download = `${quiz.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.docx`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
     hideLoading();
-    alert('✅ Dokumen Word berhasil dibuat!\n\nFile akan otomatis terdownload.');
-  } catch (err) {
-    hideLoading();
-    alert('❌ Gagal membuat dokumen: ' + err.message);
-  }
+    alert('✅ Dokumen Word berhasil dibuat!');
+  } catch (err) { hideLoading(); alert('❌ Gagal membuat dokumen: ' + err.message); }
 }
 
 function getTypeName(type) {
@@ -1809,63 +2090,31 @@ async function generateWithAI() {
   const count = parseInt(document.getElementById('aiCount').value);
   const level = document.getElementById('aiLevel').value;
   const type = document.getElementById('aiType').value;
-  
   if (!topic || !subject) { alert('Isi Mata Pelajaran dan Topik terlebih dahulu!'); return; }
   
   const btn = event.target;
   const originalText = btn.innerHTML;
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
+  btn.classList.add('btn-loading'); btn.disabled = true;
   
   const prompt = `Buat ${count} soal ujian untuk mata pelajaran ${subject} tentang "${topic}" tingkat ${level}. 
-Format JSON array dengan struktur:
-[
-  {
-    "type": "pg" atau "bs" atau "esai" atau "match" atau "multi",
-    "text": "pertanyaan",
-    "options": [{"text":"A","correct":true/false},...],
-    "matchPairs": [{"left":"...","right":"..."},...],
-    "correctBool": true/false,
-    "essayAnswer": "kunci jawaban",
-    "weight": 10
-  }
-]
-${type !== 'campuran' ? `Semua soal harus bertipe "${type}".` : 'Campuran semua jenis soal.'}
-Kembalikan HANYA JSON array valid tanpa markdown, tanpa penjelasan.`;
+Format JSON array:
+[{"type":"pg/bs/esai/match/multi","text":"pertanyaan","options":[{"text":"A","correct":true/false},...],"matchPairs":[{"left":"...","right":"..."},...],"correctBool":true/false,"essayAnswer":"kunci","weight":10}]
+${type !== 'campuran' ? `Semua soal bertipe "${type}".` : 'Campuran semua jenis.'}
+Kembalikan HANYA JSON array valid tanpa markdown.`;
 
   let lastError = null;
-  
   for (const model of AI_MODELS) {
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${state.geminiKey}`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          contents: [{parts: [{text: prompt}]}],
-          generationConfig: {temperature: 0.7, maxOutputTokens: 8000}
-        })
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ contents: [{parts: [{text: prompt}]}], generationConfig: {temperature: 0.7, maxOutputTokens: 8000} })
       });
-      
       const data = await response.json();
-      
-      if (data.error) {
-        lastError = data.error.message;
-        if (data.error.message.includes('high demand') || 
-            data.error.message.includes('not found') ||
-            data.error.message.includes('not available')) {
-          continue;
-        }
-        throw new Error(data.error.message);
-      }
-      
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        throw new Error('Respons API tidak valid. Coba lagi.');
-      }
-      
+      if (data.error) { lastError = data.error.message; if (data.error.message.includes('high demand') || data.error.message.includes('not found') || data.error.message.includes('not available')) continue; throw new Error(data.error.message); }
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) throw new Error('Respons API tidak valid.');
       let text = data.candidates[0].content.parts[0].text;
       text = text.replace(/```json/g, '').replace(/```/g, '').trim();
       const questions = JSON.parse(text);
-      
       questions.forEach(q => {
         q.id = 'q_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         if (!q.weight) q.weight = 10;
@@ -1874,30 +2123,20 @@ Kembalikan HANYA JSON array valid tanpa markdown, tanpa penjelasan.`;
         else if (q.type === 'bs') { if (q.correctBool === undefined) q.correctBool = true; }
         else if (q.type === 'esai') { if (!q.essayAnswer) q.essayAnswer = ''; }
       });
-      
       state.currentQuestions = [...state.currentQuestions, ...questions];
       renderQuestions();
-      alert(`✅ Berhasil generate ${questions.length} soal!\n(Menggunakan model: ${model})`);
-      btn.classList.remove('btn-loading');
-      btn.disabled = false;
-      return;
-      
-    } catch (err) {
-      lastError = err.message;
-      continue;
-    }
+      alert(`✅ Berhasil generate ${questions.length} soal! (Model: ${model})`);
+      btn.classList.remove('btn-loading'); btn.disabled = false; return;
+    } catch (err) { lastError = err.message; continue; }
   }
-  
-  alert('❌ Semua model AI sedang sibuk.\n\nError terakhir: ' + lastError + '\n\nSilakan coba lagi dalam 5-10 menit.');
-  btn.classList.remove('btn-loading');
-  btn.disabled = false;
+  alert('❌ Semua model AI sedang sibuk.\n\nError: ' + lastError + '\n\nCoba lagi dalam 5-10 menit.');
+  btn.classList.remove('btn-loading'); btn.disabled = false;
 }
 
 // ==================== SAVE QUIZ ====================
 async function saveQuiz() {
   const title = document.getElementById('quizTitle').value.trim();
   const subject = document.getElementById('quizSubject').value.trim();
-  
   if (!title || !subject) { alert('Judul dan Mata Pelajaran wajib diisi!'); return; }
   if (state.currentQuestions.length === 0) { alert('Tambahkan minimal 1 soal!'); return; }
   
@@ -1922,30 +2161,26 @@ async function saveQuiz() {
   };
   
   const btn = document.getElementById('saveQuizBtn');
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
+  btn.classList.add('btn-loading'); btn.disabled = true;
   
   try {
     if (state.editingQuizId) {
       await db.collection('quizzes').doc(state.editingQuizId).update(quizData);
-      alert('✅ Kuis berhasil diupdate di Firebase!');
+      alert('✅ Kuis berhasil diupdate!');
     } else {
       await db.collection('quizzes').add(quizData);
-      alert('✅ Kuis berhasil disimpan ke Firebase!');
+      alert('✅ Kuis berhasil disimpan!');
     }
     resetForm();
-    showSection('list', document.querySelectorAll('.tab')[2]);
-  } catch (err) {
-    alert('❌ Gagal menyimpan: ' + err.message);
-  } finally {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-  }
+    showSection('list', document.querySelector('.nav-item[data-section="list"]'));
+  } catch (err) { alert('❌ Gagal menyimpan: ' + err.message); }
+  finally { btn.classList.remove('btn-loading'); btn.disabled = false; }
 }
 
 function resetForm() {
   state.currentQuestions = [];
   state.editingQuizId = null;
+  state.pendingImportQuestions = [];
   document.getElementById('quizTitle').value = '';
   document.getElementById('quizSubject').value = '';
   document.getElementById('quizDesc').value = '';
@@ -1953,6 +2188,7 @@ function resetForm() {
   document.getElementById('quizPassing').value = '70';
   document.getElementById('quizShuffle').checked = false;
   document.getElementById('aiTopic').value = '';
+  document.getElementById('importPreview').classList.add('hidden');
   renderQuestions();
 }
 
@@ -1960,12 +2196,10 @@ function resetForm() {
 function renderQuizList() {
   const container = document.getElementById('quizListContainer');
   if (state.quizzes.length === 0) {
-    container.innerHTML = '<div class="alert alert-warning">Belum ada kuis. Buat kuis baru di tab "Buat Kuis".</div>';
+    container.innerHTML = '<div class="alert alert-warning">Belum ada kuis. Buat kuis baru di menu "Buat Kuis".</div>';
     return;
   }
-  
   const baseUrl = window.location.href.split('#')[0];
-  
   container.innerHTML = state.quizzes.map((q, idx) => {
     const link = baseUrl + '#quiz=' + q.id;
     const resultCount = state.results.filter(r => r.quizId === q.id).length;
@@ -1975,12 +2209,8 @@ function renderQuizList() {
         <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:10px;">
           <div style="flex:1;">
             <h3 style="margin:0;">${escapeHtml(q.title)}</h3>
-            <p style="color:#666;font-size:13px;margin-top:5px;">
-              📚 ${escapeHtml(q.subject)} | ⏱️ ${q.duration} menit | 📝 ${(q.questions||[]).length} soal | 💯 Total Bobot: ${totalWeight} | 👥 ${resultCount} peserta
-            </p>
-            <p style="color:#888;font-size:12px;margin-top:3px;">
-              Dibuat: ${new Date(q.createdAt).toLocaleString('id-ID')} ${q.shuffle ? ' | 🔀 Soal diacak' : ''}
-            </p>
+            <p style="color:#666;font-size:13px;margin-top:5px;">📚 ${escapeHtml(q.subject)} | ⏱️ ${q.duration} menit | 📝 ${(q.questions||[]).length} soal | 💯 Bobot: ${totalWeight} | 👥 ${resultCount} peserta</p>
+            <p style="color:#888;font-size:12px;margin-top:3px;">Dibuat: ${new Date(q.createdAt).toLocaleString('id-ID')} ${q.shuffle ? ' | 🔀 Soal diacak' : ''}</p>
           </div>
           <div>
             <button class="btn btn-primary" style="padding:5px 12px;font-size:12px;" onclick="editQuiz('${q.id}')">✏️ Edit</button>
@@ -1988,8 +2218,7 @@ function renderQuizList() {
           </div>
         </div>
         <div class="link-box">
-          🔗 <strong>Link Kuis:</strong><br>
-          ${link}<br>
+          🔗 <strong>Link Kuis:</strong><br>${link}<br>
           <div class="action-buttons">
             <button class="btn btn-success" style="padding:3px 10px;font-size:11px;" onclick="copyLink('${link}')">📋 Salin Link</button>
             <button class="btn btn-info" style="padding:3px 10px;font-size:11px;" onclick="shareWA('${encodeURIComponent(q.title)}', '${link}')">📱 Share WA</button>
@@ -2013,11 +2242,11 @@ function editQuiz(id) {
   document.getElementById('quizPassing').value = q.passing;
   document.getElementById('quizShuffle').checked = q.shuffle;
   renderQuestions();
-  showSection('create', document.querySelectorAll('.tab')[1]);
+  showSection('create', document.querySelector('.nav-item[data-section="create"]'));
 }
 
 async function deleteQuiz(id) {
-  if (!confirm('Hapus kuis ini beserta semua hasilnya di Firebase?')) return;
+  if (!confirm('Hapus kuis ini beserta semua hasilnya?')) return;
   try {
     await db.collection('quizzes').doc(id).delete();
     const resultsSnap = await db.collection('results').where('quizId', '==', id).get();
@@ -2030,10 +2259,8 @@ async function deleteQuiz(id) {
 
 function copyLink(link) {
   navigator.clipboard.writeText(link).then(() => alert('✅ Link tersalin!')).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = link; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    alert('✅ Link tersalin!');
+    const ta = document.createElement('textarea'); ta.value = link; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); alert('✅ Link tersalin!');
   });
 }
 
@@ -2055,14 +2282,9 @@ function loadResults() {
   const quizId = document.getElementById('resultQuizSelect').value;
   const container = document.getElementById('resultsContainer');
   if (!quizId) { container.innerHTML = ''; return; }
-  
   const quiz = state.quizzes.find(q => q.id === quizId);
   const quizResults = state.results.filter(r => r.quizId === quizId);
-  
-  if (quizResults.length === 0) {
-    container.innerHTML = '<div class="alert alert-warning">Belum ada siswa yang mengerjakan kuis ini.</div>';
-    return;
-  }
+  if (quizResults.length === 0) { container.innerHTML = '<div class="alert alert-warning">Belum ada siswa yang mengerjakan kuis ini.</div>'; return; }
   
   const avg = (quizResults.reduce((s,r) => s + (r.score||0), 0) / quizResults.length).toFixed(1);
   const highest = Math.max(...quizResults.map(r => r.score||0)).toFixed(1);
@@ -2078,34 +2300,14 @@ function loadResults() {
       <div class="result-card"><div class="num">${passed}/${quizResults.length}</div><div class="lbl">Lulus KKM (${quiz.passing})</div></div>
     </div>
     <button class="btn btn-success" onclick="exportExcel('${quizId}')">📊 Export ke Excel</button>
-    <button class="btn btn-warning" onclick="exportToDocx('${quizId}')">📄 Export ke Word (DOCX)</button>
+    <button class="btn btn-warning" onclick="exportToDocx('${quizId}')">📄 Export ke Word</button>
     <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak</button>
-    <table>
-      <thead>
-        <tr>
-          <th>No</th><th>NIS</th><th>Nama Siswa</th><th>Kelas</th>
-          <th>Waktu Submit</th><th>Nilai</th><th>Status</th><th>Detail</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+    <table><thead><tr><th>No</th><th>NIS</th><th>Nama Siswa</th><th>Kelas</th><th>Waktu Submit</th><th>Nilai</th><th>Status</th><th>Detail</th></tr></thead><tbody>`;
   
   quizResults.forEach((r, i) => {
     const status = (r.score||0) >= quiz.passing ? '<span style="color:green;font-weight:600;">✅ Lulus</span>' : '<span style="color:red;font-weight:600;">❌ Tidak Lulus</span>';
-    html += `
-      <tr>
-        <td>${i+1}</td>
-        <td>${escapeHtml(r.studentNIS || '-')}</td>
-        <td>${escapeHtml(r.studentName)}</td>
-        <td>${escapeHtml(r.studentClass || '-')}</td>
-        <td>${new Date(r.submittedAt).toLocaleString('id-ID')}</td>
-        <td><strong>${(r.score||0).toFixed(1)}</strong></td>
-        <td>${status}</td>
-        <td><button class="btn btn-info" style="padding:3px 8px;font-size:11px;" onclick='showDetail(${JSON.stringify(r).replace(/'/g,"&#39;")}, ${JSON.stringify(quiz).replace(/'/g,"&#39;")})'>👁️ Lihat</button></td>
-      </tr>
-    `;
+    html += `<tr><td>${i+1}</td><td>${escapeHtml(r.studentNIS || '-')}</td><td>${escapeHtml(r.studentName)}</td><td>${escapeHtml(r.studentClass || '-')}</td><td>${new Date(r.submittedAt).toLocaleString('id-ID')}</td><td><strong>${(r.score||0).toFixed(1)}</strong></td><td>${status}</td><td><button class="btn btn-info" style="padding:3px 8px;font-size:11px;" onclick='showDetail(${JSON.stringify(r).replace(/'/g,"&#39;")}, ${JSON.stringify(quiz).replace(/'/g,"&#39;")})'>👁️ Lihat</button></td></tr>`;
   });
-  
   html += '</tbody></table>';
   container.innerHTML = html;
 }
@@ -2115,63 +2317,29 @@ function showDetail(result, quiz) {
   (result.answers || []).forEach((ans, i) => {
     const q = (quiz.questions || []).find(x => x.id === ans.questionId);
     if (!q) return;
-    html += `
-      <div class="question-item">
-        <strong>Soal ${i+1} (${q.weight} poin):</strong> ${escapeHtml(q.text)}<br>
-        <small>Jawaban siswa: <b>${escapeHtml(String(ans.answer))}</b> | Skor: <b>${ans.score}/${q.weight}</b></small>
-      </div>
-    `;
+    html += `<div class="question-item"><strong>Soal ${i+1} (${q.weight} poin):</strong> ${escapeHtml(q.text)}<br><small>Jawaban: <b>${escapeHtml(String(ans.answer))}</b> | Skor: <b>${ans.score}/${q.weight}</b></small></div>`;
   });
   html += `<h3>Total Nilai: ${(result.score||0).toFixed(1)}</h3>`;
-  
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;overflow:auto;padding:20px;';
-  modal.innerHTML = `
-    <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:20px;">
-      ${html}
-      <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()">Tutup</button>
-    </div>
-  `;
+  modal.innerHTML = `<div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:20px;">${html}<button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()">Tutup</button></div>`;
   document.body.appendChild(modal);
 }
 
 function exportExcel(quizId) {
   const quiz = state.quizzes.find(q => q.id === quizId);
   const quizResults = state.results.filter(r => r.quizId === quizId);
-  
   const data = quizResults.map((r, i) => {
-    const row = {
-      'No': i+1, 'NIS': r.studentNIS || '-', 'Nama Siswa': r.studentName,
-      'Kelas': r.studentClass || '-',
-      'Waktu Submit': new Date(r.submittedAt).toLocaleString('id-ID'),
-      'Nilai': (r.score||0).toFixed(1),
-      'Status': (r.score||0) >= quiz.passing ? 'Lulus' : 'Tidak Lulus'
-    };
-    (quiz.questions || []).forEach((q, qi) => {
-      const ans = (r.answers || []).find(a => a.questionId === q.id);
-      row[`Soal ${qi+1} (${q.weight})`] = ans ? `${ans.answer} [${ans.score}]` : '-';
-    });
+    const row = {'No': i+1, 'NIS': r.studentNIS || '-', 'Nama Siswa': r.studentName, 'Kelas': r.studentClass || '-', 'Waktu Submit': new Date(r.submittedAt).toLocaleString('id-ID'), 'Nilai': (r.score||0).toFixed(1), 'Status': (r.score||0) >= quiz.passing ? 'Lulus' : 'Tidak Lulus'};
+    (quiz.questions || []).forEach((q, qi) => { const ans = (r.answers || []).find(a => a.questionId === q.id); row[`Soal ${qi+1} (${q.weight})`] = ans ? `${ans.answer} [${ans.score}]` : '-'; });
     return row;
   });
-  
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Hasil');
-  
-  const summary = [
-    {'Item': 'Judul Kuis', 'Nilai': quiz.title},
-    {'Item': 'Mata Pelajaran', 'Nilai': quiz.subject},
-    {'Item': 'Jumlah Peserta', 'Nilai': quizResults.length},
-    {'Item': 'Rata-rata', 'Nilai': (quizResults.reduce((s,r)=>s+(r.score||0),0)/quizResults.length).toFixed(1)},
-    {'Item': 'Nilai Tertinggi', 'Nilai': Math.max(...quizResults.map(r=>r.score||0)).toFixed(1)},
-    {'Item': 'Nilai Terendah', 'Nilai': Math.min(...quizResults.map(r=>r.score||0)).toFixed(1)},
-    {'Item': 'Lulus KKM', 'Nilai': quizResults.filter(r=>(r.score||0)>=quiz.passing).length},
-    {'Item': 'Tidak Lulus', 'Nilai': quizResults.filter(r=>(r.score||0)<quiz.passing).length},
-    {'Item': 'Tanggal Export', 'Nilai': new Date().toLocaleString('id-ID')}
-  ];
+  const summary = [{'Item': 'Judul Kuis', 'Nilai': quiz.title}, {'Item': 'Mata Pelajaran', 'Nilai': quiz.subject}, {'Item': 'Jumlah Peserta', 'Nilai': quizResults.length}, {'Item': 'Rata-rata', 'Nilai': (quizResults.reduce((s,r)=>s+(r.score||0),0)/quizResults.length).toFixed(1)}, {'Item': 'Nilai Tertinggi', 'Nilai': Math.max(...quizResults.map(r=>r.score||0)).toFixed(1)}, {'Item': 'Nilai Terendah', 'Nilai': Math.min(...quizResults.map(r=>r.score||0)).toFixed(1)}, {'Item': 'Lulus KKM', 'Nilai': quizResults.filter(r=>(r.score||0)>=quiz.passing).length}, {'Item': 'Tidak Lulus', 'Nilai': quizResults.filter(r=>(r.score||0)<quiz.passing).length}, {'Item': 'Tanggal Export', 'Nilai': new Date().toLocaleString('id-ID')}];
   const ws2 = XLSX.utils.json_to_sheet(summary);
   XLSX.utils.book_append_sheet(wb, ws2, 'Ringkasan');
-  
   XLSX.writeFile(wb, `Hasil_${quiz.title}_${Date.now()}.xlsx`);
 }
 
@@ -2182,18 +2350,12 @@ function startStudentMode(quiz) {
   studentState.quiz = quiz;
   studentState.answers = {};
   studentState.startTime = Date.now();
-  
   let questions = [...(quiz.questions || [])];
   if (quiz.shuffle) {
     questions = questions.sort(() => Math.random() - 0.5);
     questions.forEach(q => {
-      if ((q.type === 'pg' || q.type === 'multi') && q.options) {
-        q.options = [...q.options].sort(() => Math.random() - 0.5);
-      }
-      if (q.type === 'match' && q.matchPairs) {
-        const rights = [...q.matchPairs].map(p => p.right).sort(() => Math.random() - 0.5);
-        q.matchPairs = q.matchPairs.map((p, i) => ({left: p.left, right: rights[i]}));
-      }
+      if ((q.type === 'pg' || q.type === 'multi') && q.options) q.options = [...q.options].sort(() => Math.random() - 0.5);
+      if (q.type === 'match' && q.matchPairs) { const rights = [...q.matchPairs].map(p => p.right).sort(() => Math.random() - 0.5); q.matchPairs = q.matchPairs.map((p, i) => ({left: p.left, right: rights[i]})); }
     });
   }
   studentState.shuffledQuestions = questions;
@@ -2203,48 +2365,12 @@ function startStudentMode(quiz) {
 function renderStudentForm() {
   const quiz = studentState.quiz;
   const container = document.getElementById('studentContent');
-  
   const majors = ['TITEL', 'TPTU', 'GP', 'TP', 'DKV', 'TEI', 'TAV', 'TAB'];
   const grades = [10, 11, 12];
   let classOptions = '<option value="">-- Pilih Kelas --</option>';
-  grades.forEach(grade => {
-    majors.forEach(major => {
-      classOptions += `<option value="${grade} ${major}">${grade} ${major}</option>`;
-    });
-  });
-  
+  grades.forEach(grade => { majors.forEach(major => { classOptions += `<option value="${grade} ${major}">${grade} ${major}</option>`; }); });
   const logoHtml = state.schoolLogo ? `<img src="${state.schoolLogo}" style="max-height:70px;margin-bottom:15px;background:#fff;padding:10px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.15);animation:logoBounce 2s ease infinite;">` : '';
-  
-  container.innerHTML = `
-    ${logoHtml}
-    <h2>${escapeHtml(quiz.title)}</h2>
-    <div class="student-info">
-      <p><strong>📚 Mata Pelajaran:</strong> ${escapeHtml(quiz.subject)}</p>
-      ${quiz.description ? `<p><strong>📝 Deskripsi:</strong> ${escapeHtml(quiz.description)}</p>` : ''}
-      <p><strong>📋 Jumlah Soal:</strong> ${(quiz.questions||[]).length} | <strong>⏱️ Durasi:</strong> ${quiz.duration > 0 ? quiz.duration + ' menit' : 'Tanpa batas'}</p>
-    </div>
-    
-    <div id="studentFormArea">
-      <div class="quiz-card">
-        <h3>👤 Data Siswa</h3>
-        <div class="grid-3">
-          <div class="form-group">
-            <label>NIS *</label>
-            <input type="text" id="studentNIS" placeholder="Nomor Induk Siswa">
-          </div>
-          <div class="form-group">
-            <label>Nama Lengkap *</label>
-            <input type="text" id="studentName" placeholder="Nama lengkap">
-          </div>
-          <div class="form-group">
-            <label>Kelas *</label>
-            <select id="studentClass">${classOptions}</select>
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="startQuiz()">🚀 Mulai Mengerjakan</button>
-      </div>
-    </div>
-  `;
+  container.innerHTML = `${logoHtml}<h2>${escapeHtml(quiz.title)}</h2><div class="student-info"><p><strong>📚 Mata Pelajaran:</strong> ${escapeHtml(quiz.subject)}</p>${quiz.description ? `<p><strong>📝 Deskripsi:</strong> ${escapeHtml(quiz.description)}</p>` : ''}<p><strong>📋 Jumlah Soal:</strong> ${(quiz.questions||[]).length} | <strong>⏱️ Durasi:</strong> ${quiz.duration > 0 ? quiz.duration + ' menit' : 'Tanpa batas'}</p></div><div id="studentFormArea"><div class="quiz-card"><h3>👤 Data Siswa</h3><div class="grid-3"><div class="form-group"><label>NIS *</label><input type="text" id="studentNIS" placeholder="Nomor Induk Siswa"></div><div class="form-group"><label>Nama Lengkap *</label><input type="text" id="studentName" placeholder="Nama lengkap"></div><div class="form-group"><label>Kelas *</label><select id="studentClass">${classOptions}</select></div></div><button class="btn btn-primary" onclick="startQuiz()">🚀 Mulai Mengerjakan</button></div></div>`;
 }
 
 function startQuiz() {
@@ -2252,204 +2378,83 @@ function startQuiz() {
   const name = document.getElementById('studentName').value.trim();
   const cls = document.getElementById('studentClass').value;
   if (!nis || !name || !cls) { alert('Isi NIS, nama, dan kelas terlebih dahulu!'); return; }
-  studentState.studentNIS = nis;
-  studentState.studentName = name;
-  studentState.studentClass = cls;
+  studentState.studentNIS = nis; studentState.studentName = name; studentState.studentClass = cls;
   renderQuestionsStudent();
   if (studentState.quiz.duration > 0) startTimer(studentState.quiz.duration * 60);
 }
 
 function startTimer(seconds) {
   const timerDiv = document.createElement('div');
-  timerDiv.className = 'timer';
-  timerDiv.id = 'timer';
+  timerDiv.className = 'timer'; timerDiv.id = 'timer';
   document.getElementById('studentFormArea').prepend(timerDiv);
-  
   let remaining = seconds;
   studentState.timerInterval = setInterval(() => {
     remaining--;
-    const m = Math.floor(remaining / 60);
-    const s = remaining % 60;
+    const m = Math.floor(remaining / 60); const s = remaining % 60;
     timerDiv.innerHTML = `⏱️ Sisa Waktu: ${m}:${s.toString().padStart(2,'0')}`;
-    if (remaining <= 0) {
-      clearInterval(studentState.timerInterval);
-      alert('⏰ Waktu habis! Jawaban akan otomatis dikumpulkan.');
-      submitQuiz();
-    }
+    if (remaining <= 0) { clearInterval(studentState.timerInterval); alert('⏰ Waktu habis!'); submitQuiz(); }
   }, 1000);
 }
 
 function renderQuestionsStudent() {
   const container = document.getElementById('studentFormArea');
   const questions = studentState.shuffledQuestions;
-  
   let html = '';
   questions.forEach((q, idx) => {
     html += `<div class="quiz-card"><h3>Soal ${idx+1} <span style="color:#666;font-size:13px;font-weight:normal;">(Bobot: ${q.weight} poin)</span></h3>`;
     html += `<p style="margin:10px 0;white-space:pre-wrap;">${escapeHtml(q.text)}</p>`;
     if (q.image) html += `<img src="${q.image}" class="img-preview" style="max-width:100%;cursor:zoom-in;" onclick="openZoom('${q.image}')" title="Klik untuk zoom"><br>`;
-    
-    if (q.type === 'pg') {
-      q.options.forEach((opt, oIdx) => {
-        html += `<label class="checkbox-label"><input type="radio" name="q_${q.id}" value="${oIdx}" onchange="setAnswer('${q.id}', ${oIdx})">${escapeHtml(opt.text)}</label>`;
-      });
-    } else if (q.type === 'multi') {
-      html += '<small style="color:#c62828;">Pilih semua jawaban yang benar:</small>';
-      q.options.forEach((opt, oIdx) => {
-        html += `<label class="checkbox-label"><input type="checkbox" onchange="toggleMultiAnswer('${q.id}', ${oIdx}, this.checked)">${escapeHtml(opt.text)}</label>`;
-      });
-    } else if (q.type === 'bs') {
-      html += `
-        <label class="checkbox-label"><input type="radio" name="q_${q.id}" value="true" onchange="setAnswer('${q.id}', true)"> Benar</label>
-        <label class="checkbox-label"><input type="radio" name="q_${q.id}" value="false" onchange="setAnswer('${q.id}', false)"> Salah</label>
-      `;
-    } else if (q.type === 'esai') {
-      html += `<textarea onchange="setAnswer('${q.id}', this.value)" placeholder="Tulis jawaban Anda..."></textarea>`;
-    } else if (q.type === 'match') {
-      html += '<div class="match-container"><div class="match-col"><strong>Pernyataan:</strong>';
-      q.matchPairs.forEach((p, pIdx) => { html += `<div class="match-item">${escapeHtml(p.left)}</div>`; });
-      html += '</div><div class="match-col"><strong>Pasangan:</strong>';
-      const rights = [...q.matchPairs].map(p => p.right);
-      q.matchPairs.forEach((p, pIdx) => {
-        html += `<div class="match-item"><select onchange="setMatchAnswer('${q.id}', ${pIdx}, this.value)"><option value="">-- Pilih --</option>${rights.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('')}</select></div>`;
-      });
-      html += '</div></div>';
-    }
+    if (q.type === 'pg') { q.options.forEach((opt, oIdx) => { html += `<label class="checkbox-label"><input type="radio" name="q_${q.id}" value="${oIdx}" onchange="setAnswer('${q.id}', ${oIdx})">${escapeHtml(opt.text)}</label>`; }); }
+    else if (q.type === 'multi') { html += '<small style="color:#c62828;">Pilih semua jawaban yang benar:</small>'; q.options.forEach((opt, oIdx) => { html += `<label class="checkbox-label"><input type="checkbox" onchange="toggleMultiAnswer('${q.id}', ${oIdx}, this.checked)">${escapeHtml(opt.text)}</label>`; }); }
+    else if (q.type === 'bs') { html += `<label class="checkbox-label"><input type="radio" name="q_${q.id}" value="true" onchange="setAnswer('${q.id}', true)"> Benar</label><label class="checkbox-label"><input type="radio" name="q_${q_${q.id}" value="false" onchange="setAnswer('${q.id}', false)"> Salah</label>`; }
+    else if (q.type === 'esai') { html += `<textarea onchange="setAnswer('${q.id}', this.value)" placeholder="Tulis jawaban Anda..."></textarea>`; }
+    else if (q.type === 'match') { html += '<div class="match-container"><div class="match-col"><strong>Pernyataan:</strong>'; q.matchPairs.forEach((p, pIdx) => { html += `<div class="match-item">${escapeHtml(p.left)}</div>`; }); html += '</div><div class="match-col"><strong>Pasangan:</strong>'; const rights = [...q.matchPairs].map(p => p.right); q.matchPairs.forEach((p, pIdx) => { html += `<div class="match-item"><select onchange="setMatchAnswer('${q.id}', ${pIdx}, this.value)"><option value="">-- Pilih --</option>${rights.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('')}</select></div>`; }); html += '</div></div>'; }
     html += '</div>';
   });
-  
   html += `<button class="btn btn-success" id="submitQuizBtn" style="width:100%;padding:16px;font-size:16px;" onclick="confirmSubmit()">📤 Kumpulkan Jawaban</button>`;
   container.innerHTML = html;
 }
 
 function setAnswer(qId, value) { studentState.answers[qId] = value; }
-
-function toggleMultiAnswer(qId, oIdx, checked) {
-  if (!studentState.answers[qId]) studentState.answers[qId] = [];
-  if (checked) { if (!studentState.answers[qId].includes(oIdx)) studentState.answers[qId].push(oIdx); }
-  else { studentState.answers[qId] = studentState.answers[qId].filter(x => x !== oIdx); }
-}
-
-function setMatchAnswer(qId, pIdx, value) {
-  if (!studentState.answers[qId]) studentState.answers[qId] = {};
-  studentState.answers[qId][pIdx] = value;
-}
+function toggleMultiAnswer(qId, oIdx, checked) { if (!studentState.answers[qId]) studentState.answers[qId] = []; if (checked) { if (!studentState.answers[qId].includes(oIdx)) studentState.answers[qId].push(oIdx); } else { studentState.answers[qId] = studentState.answers[qId].filter(x => x !== oIdx); } }
+function setMatchAnswer(qId, pIdx, value) { if (!studentState.answers[qId]) studentState.answers[qId] = {}; studentState.answers[qId][pIdx] = value; }
 
 function confirmSubmit() {
-  const unanswered = studentState.shuffledQuestions.filter(q => {
-    const ans = studentState.answers[q.id];
-    if (ans === undefined || ans === null || ans === '') return true;
-    if (Array.isArray(ans) && ans.length === 0) return true;
-    if (typeof ans === 'object' && !Array.isArray(ans) && Object.keys(ans).length === 0) return true;
-    return false;
-  });
-  
-  if (unanswered.length > 0) {
-    if (!confirm(`Masih ada ${unanswered.length} soal belum dijawab. Yakin ingin mengumpulkan?`)) return;
-  } else {
-    if (!confirm('Yakin ingin mengumpulkan jawaban?')) return;
-  }
+  const unanswered = studentState.shuffledQuestions.filter(q => { const ans = studentState.answers[q.id]; if (ans === undefined || ans === null || ans === '') return true; if (Array.isArray(ans) && ans.length === 0) return true; if (typeof ans === 'object' && !Array.isArray(ans) && Object.keys(ans).length === 0) return true; return false; });
+  if (unanswered.length > 0) { if (!confirm(`Masih ada ${unanswered.length} soal belum dijawab. Yakin ingin mengumpulkan?`)) return; }
+  else { if (!confirm('Yakin ingin mengumpulkan jawaban?')) return; }
   submitQuiz();
 }
 
 async function submitQuiz() {
   if (studentState.timerInterval) clearInterval(studentState.timerInterval);
-  
   const btn = document.getElementById('submitQuizBtn');
-  if (btn) {
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-  }
+  if (btn) { btn.classList.add('btn-loading'); btn.disabled = true; }
   showLoading('Mengumpulkan jawaban...');
-  
   const quiz = studentState.quiz;
-  let totalScore = 0, maxScore = 0;
-  const answers = [];
-  
+  let totalScore = 0, maxScore = 0; const answers = [];
   studentState.shuffledQuestions.forEach(q => {
-    maxScore += q.weight;
-    const ans = studentState.answers[q.id];
-    let score = 0, answerText = '-';
-    
-    if (q.type === 'pg') {
-      if (ans !== undefined) {
-        answerText = q.options[ans]?.text || '-';
-        if (q.options[ans]?.correct) score = q.weight;
-      }
-    } else if (q.type === 'multi') {
-      const selected = ans || [];
-      answerText = selected.map(i => q.options[i]?.text).filter(Boolean).join(', ') || '-';
-      const correctIdx = q.options.map((o,i) => o.correct ? i : -1).filter(i => i >= 0);
-      const isCorrect = correctIdx.length === selected.length && correctIdx.every(i => selected.includes(i));
-      if (isCorrect) score = q.weight;
-    } else if (q.type === 'bs') {
-      if (ans !== undefined) {
-        answerText = ans ? 'Benar' : 'Salah';
-        if (ans === q.correctBool) score = q.weight;
-      }
-    } else if (q.type === 'esai') {
-      answerText = ans || '-'; score = 0;
-    } else if (q.type === 'match') {
-      const matchAns = ans || {};
-      const correctCount = q.matchPairs.filter((p, i) => matchAns[i] === p.right).length;
-      answerText = q.matchPairs.map((p, i) => `${p.left} → ${matchAns[i] || '-'}`).join('; ');
-      score = (correctCount / q.matchPairs.length) * q.weight;
-    }
-    
-    totalScore += score;
-    answers.push({questionId: q.id, answer: answerText, score: score});
+    maxScore += q.weight; const ans = studentState.answers[q.id]; let score = 0, answerText = '-';
+    if (q.type === 'pg') { if (ans !== undefined) { answerText = q.options[ans]?.text || '-'; if (q.options[ans]?.correct) score = q.weight; } }
+    else if (q.type === 'multi') { const selected = ans || []; answerText = selected.map(i => q.options[i]?.text).filter(Boolean).join(', ') || '-'; const correctIdx = q.options.map((o,i) => o.correct ? i : -1).filter(i => i >= 0); const isCorrect = correctIdx.length === selected.length && correctIdx.every(i => selected.includes(i)); if (isCorrect) score = q.weight; }
+    else if (q.type === 'bs') { if (ans !== undefined) { answerText = ans ? 'Benar' : 'Salah'; if (ans === q.correctBool) score = q.weight; } }
+    else if (q.type === 'esai') { answerText = ans || '-'; score = 0; }
+    else if (q.type === 'match') { const matchAns = ans || {}; const correctCount = q.matchPairs.filter((p, i) => matchAns[i] === p.right).length; answerText = q.matchPairs.map((p, i) => `${p.left} → ${matchAns[i] || '-'}`).join('; '); score = (correctCount / q.matchPairs.length) * q.weight; }
+    totalScore += score; answers.push({questionId: q.id, answer: answerText, score: score});
   });
-  
   const finalScore = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
-  
-  const result = {
-    quizId: quiz.id, quizTitle: quiz.title,
-    studentNIS: studentState.studentNIS,
-    studentName: studentState.studentName,
-    studentClass: studentState.studentClass,
-    answers: answers, score: finalScore,
-    rawScore: totalScore, maxScore: maxScore,
-    submittedAt: new Date().toISOString(),
-    duration: Math.floor((Date.now() - studentState.startTime) / 1000)
-  };
-  
-  try { 
-    await db.collection('results').add(result);
-    if (state.emailjs.publicKey && state.teacher.email) await sendEmail(result);
-  } catch (err) { 
-    console.error('Firebase save error:', err);
-  }
-  
+  const result = { quizId: quiz.id, quizTitle: quiz.title, studentNIS: studentState.studentNIS, studentName: studentState.studentName, studentClass: studentState.studentClass, answers: answers, score: finalScore, rawScore: totalScore, maxScore: maxScore, submittedAt: new Date().toISOString(), duration: Math.floor((Date.now() - studentState.startTime) / 1000) };
+  try { await db.collection('results').add(result); if (state.emailjs.publicKey && state.teacher.email) await sendEmail(result); } catch (err) { console.error('Firebase save error:', err); }
   hideLoading();
-  
   const passed = finalScore >= quiz.passing;
-  document.getElementById('studentFormArea').innerHTML = `
-    <div style="text-align:center;padding:40px;">
-      <h2 style="color:${passed?'#10B981':'#EF4444'};">${passed ? '🎉 Selamat!' : '💪 Semangat!'}</h2>
-      <h1 style="font-size:72px;margin:20px 0;background:linear-gradient(135deg,#FF6B35,#EC4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">${finalScore.toFixed(1)}</h1>
-      <p style="font-size:20px;font-weight:600;color:#1E3A8A;">Nilai Anda</p>
-      <p style="margin-top:15px;font-size:16px;">${passed ? `✅ Anda LULUS (KKM: ${quiz.passing})` : `❌ Anda BELUM LULUS (KKM: ${quiz.passing})`}</p>
-      <p style="margin-top:25px;color:#666;">Jawaban Anda telah dikirim ke guru. Terima kasih!</p>
-      <p style="margin-top:10px;color:#888;font-size:13px;">Waktu pengerjaan: ${Math.floor(result.duration/60)} menit ${result.duration%60} detik</p>
-    </div>
-  `;
+  document.getElementById('studentFormArea').innerHTML = `<div style="text-align:center;padding:40px;"><h2 style="color:${passed?'#10B981':'#EF4444'};">${passed ? '🎉 Selamat!' : '💪 Semangat!'}</h2><h1 style="font-size:72px;margin:20px 0;background:linear-gradient(135deg,#FF6B35,#EC4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">${finalScore.toFixed(1)}</h1><p style="font-size:20px;font-weight:600;color:#1E3A8A;">Nilai Anda</p><p style="margin-top:15px;font-size:16px;">${passed ? `✅ Anda LULUS (KKM: ${quiz.passing})` : `❌ Anda BELUM LULUS (KKM: ${quiz.passing})`}</p><p style="margin-top:25px;color:#666;">Jawaban Anda telah dikirim ke guru. Terima kasih!</p><p style="margin-top:10px;color:#888;font-size:13px;">Waktu pengerjaan: ${Math.floor(result.duration/60)} menit ${result.duration%60} detik</p></div>`;
 }
 
 async function sendEmail(result) {
   try {
     if (!emailjs) { try { emailjs.init(state.emailjs.publicKey); } catch(e) { return; } }
     const details = result.answers.map((a, i) => `Soal ${i+1}: ${a.answer} (Skor: ${a.score})`).join('\n');
-    await emailjs.send(state.emailjs.serviceId, state.emailjs.templateId, {
-      to_email: state.teacher.email,
-      student_name: result.studentName,
-      student_nis: result.studentNIS,
-      student_class: result.studentClass,
-      quiz_title: result.quizTitle,
-      score: result.score.toFixed(1),
-      passed: result.score >= (state.quizzes.find(q => q.id === result.quizId)?.passing || 70) ? 'LULUS' : 'TIDAK LULUS',
-      details: details,
-      submitted_at: new Date(result.submittedAt).toLocaleString('id-ID')
-    });
+    await emailjs.send(state.emailjs.serviceId, state.emailjs.templateId, { to_email: state.teacher.email, student_name: result.studentName, student_nis: result.studentNIS, student_class: result.studentClass, quiz_title: result.quizTitle, score: result.score.toFixed(1), passed: result.score >= (state.quizzes.find(q => q.id === result.quizId)?.passing || 70) ? 'LULUS' : 'TIDAK LULUS', details: details, submitted_at: new Date(result.submittedAt).toLocaleString('id-ID') });
   } catch (err) { console.log('Email gagal dikirim:', err); }
 }
 
