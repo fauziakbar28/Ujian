@@ -1216,12 +1216,15 @@ function setupFirebaseListeners() {
       if (statusEl) {
         statusEl.textContent = '✅ Terhubung ke Firebase | Cloudinary: rbxpbias';
         statusEl.classList.remove('offline');
+        updateSyncBadges(true);  // ← TAMBAHKAN BARIS INI!
+}
       }
     }, error => {
       console.error('Firestore error:', error);
       if (statusEl) {
         statusEl.textContent = '❌ Error: ' + error.message;
         statusEl.classList.add('offline');
+        updateSyncBadges(false);  
       }
     });
     
