@@ -8,19 +8,18 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<!-- Library untuk Export DOCX -->
 <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
   
-  /* ANIMATED GRADIENT BACKGROUND */
   body {
     background: linear-gradient(-45deg, #FF6B35, #1E3A8A, #FBBF24, #EC4899, #FF6B35, #10B981);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
     min-height: 100vh;
     padding: 20px;
+    padding-bottom: 100px;
     position: relative;
     overflow-x: hidden;
   }
@@ -30,7 +29,6 @@
     100% { background-position: 0% 50%; }
   }
   
-  /* FLOATING PARTICLES */
   .particle {
     position: fixed;
     border-radius: 50%;
@@ -142,48 +140,95 @@
   }
   .firebase-status.offline { 
     background: linear-gradient(90deg, #dc3545, #c82333); 
-    background-size: 200% 100%;
-    animation: statusSlide 3s ease infinite;
   }
   
-  .tabs { 
-    display: flex; 
-    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 3px solid #FF6B35; 
-    flex-wrap: wrap; 
+  .bottom-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 50px;
+    padding: 10px 15px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.5);
+    display: flex;
+    gap: 5px;
+    z-index: 1000;
+    max-width: 95%;
+    overflow-x: auto;
+    animation: navSlideUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .tab { 
-    flex: 1; 
-    min-width: 120px; 
-    padding: 18px; 
-    text-align: center; 
-    cursor: pointer; 
-    border: none; 
-    background: none; 
-    font-size: 14px; 
-    font-weight: 600; 
-    color: #666; 
+  @keyframes navSlideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(100px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .bottom-nav::-webkit-scrollbar { display: none; }
+  
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 40px;
+    cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-width: 70px;
     position: relative;
+    color: #666;
   }
-  .tab:hover { 
+  .nav-item:hover {
     background: rgba(255,107,53,0.1);
-    color: #FF6B35;
     transform: translateY(-3px);
   }
-  .tab.active { 
-    background: #fff; 
-    color: #FF6B35; 
-    border-bottom: 3px solid #FF6B35;
-    animation: tabPop 0.4s ease;
+  .nav-item.active {
+    background: linear-gradient(135deg, #FF6B35, #EC4899);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(255,107,53,0.5);
+    transform: translateY(-5px) scale(1.05);
   }
-  @keyframes tabPop {
-    0% { transform: scale(0.9); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+  .nav-item .nav-icon {
+    font-size: 22px;
+    margin-bottom: 3px;
+    transition: transform 0.3s;
+  }
+  .nav-item.active .nav-icon {
+    transform: scale(1.2);
+    animation: iconBounce 0.5s ease;
+  }
+  @keyframes iconBounce {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.4); }
+  }
+  .nav-item .nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .nav-item .nav-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 16px;
+    text-align: center;
   }
   
-  .content { padding: 30px; min-height: 500px; }
+  @media (max-width: 600px) {
+    .nav-item { min-width: 60px; padding: 8px 10px; }
+    .nav-item .nav-icon { font-size: 18px; }
+    .nav-item .nav-label { font-size: 9px; }
+  }
+  
+  .content { padding: 30px; padding-bottom: 30px; min-height: 500px; }
   .section { display: none; }
   .section.active { display: block; animation: fadeInUp 0.5s ease; }
   @keyframes fadeInUp { 
@@ -257,73 +302,52 @@
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
   }
-  .btn:active::before {
-    width: 300px; height: 300px;
-  }
+  .btn:active::before { width: 300px; height: 300px; }
+  
   .btn-primary { 
     background: linear-gradient(135deg, #FF6B35, #FF8C42); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(255,107,53,0.4);
   }
-  .btn-primary:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255,107,53,0.6);
-  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,107,53,0.6); }
   .btn-success { 
     background: linear-gradient(135deg, #28a745, #20c997); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(40,167,69,0.4);
   }
-  .btn-success:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(40,167,69,0.6);
-  }
+  .btn-success:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(40,167,69,0.6); }
   .btn-danger { 
     background: linear-gradient(135deg, #dc3545, #c82333); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(220,53,69,0.4);
   }
-  .btn-danger:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(220,53,69,0.6);
-  }
+  .btn-danger:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(220,53,69,0.6); }
   .btn-warning { 
     background: linear-gradient(135deg, #FBBF24, #F59E0B); 
     color: #333;
     box-shadow: 0 5px 18px rgba(251,191,36,0.4);
   }
-  .btn-warning:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(251,191,36,0.6);
-  }
+  .btn-warning:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(251,191,36,0.6); }
   .btn-info { 
     background: linear-gradient(135deg, #1E3A8A, #3B82F6); 
     color: #fff;
     box-shadow: 0 5px 18px rgba(30,58,138,0.4);
   }
-  .btn-info:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(30,58,138,0.6);
-  }
+  .btn-info:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(30,58,138,0.6); }
   .btn-secondary { 
     background: linear-gradient(135deg, #6c757d, #495057); 
     color: #fff;
   }
-  .btn-secondary:hover { 
-    transform: translateY(-3px);
+  .btn-secondary:hover { transform: translateY(-3px); }
+  .btn-purple {
+    background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+    color: #fff;
+    box-shadow: 0 5px 18px rgba(139,92,246,0.4);
   }
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-  }
+  .btn-purple:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(139,92,246,0.6); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
   
-  /* LOADING SPINNER ON BUTTON */
-  .btn-loading {
-    position: relative;
-    color: transparent !important;
-    pointer-events: none;
-  }
+  .btn-loading { position: relative; color: transparent !important; pointer-events: none; }
   .btn-loading::after {
     content: '';
     position: absolute;
@@ -335,9 +359,7 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
-  @keyframes spin { 
-    to { transform: rotate(360deg); } 
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
   
   .quiz-card { 
     background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
@@ -414,26 +436,10 @@
     from { opacity: 0; transform: translateX(-20px); }
     to { opacity: 1; transform: translateX(0); }
   }
-  .alert-info { 
-    background: linear-gradient(135deg, #DBEAFE, #BFDBFE); 
-    color: #1E3A8A; 
-    border-color: #3B82F6;
-  }
-  .alert-success { 
-    background: linear-gradient(135deg, #D1FAE5, #A7F3D0); 
-    color: #065F46; 
-    border-color: #10B981;
-  }
-  .alert-warning { 
-    background: linear-gradient(135deg, #FEF3C7, #FDE68A); 
-    color: #92400E; 
-    border-color: #F59E0B;
-  }
-  .alert-danger { 
-    background: linear-gradient(135deg, #FEE2E2, #FECACA); 
-    color: #991B1B; 
-    border-color: #EF4444;
-  }
+  .alert-info { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #1E3A8A; border-color: #3B82F6; }
+  .alert-success { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #065F46; border-color: #10B981; }
+  .alert-warning { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #92400E; border-color: #F59E0B; }
+  .alert-danger { background: linear-gradient(135deg, #FEE2E2, #FECACA); color: #991B1B; border-color: #EF4444; }
   
   .link-box { 
     background: linear-gradient(135deg, #FEF3C7, #FDE68A);
@@ -448,20 +454,14 @@
   
   table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
   table th, table td { padding: 13px; border: 1px solid #e5e7eb; text-align: left; font-size: 14px; }
-  table th { 
-    background: linear-gradient(135deg, #1E3A8A, #3B82F6); 
-    color: #fff;
-    font-weight: 600;
-  }
+  table th { background: linear-gradient(135deg, #1E3A8A, #3B82F6); color: #fff; font-weight: 600; }
   table tr:nth-child(even) { background: #f9fafb; }
   table tr { transition: all 0.3s; }
   table tr:hover { background: #FEF3C7; transform: scale(1.01); }
   
   .img-preview { 
-    max-width: 220px; 
-    max-height: 160px; 
-    border-radius: 12px; 
-    margin-top: 10px; 
+    max-width: 220px; max-height: 160px; 
+    border-radius: 12px; margin-top: 10px; 
     border: 3px solid #e0e0e0;
     cursor: zoom-in;
     transition: all 0.3s;
@@ -476,24 +476,16 @@
   .student-view h2 { text-align: center; color: #1E3A8A; }
   .student-info { 
     background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-    padding: 20px; 
-    border-radius: 14px; 
-    margin-bottom: 22px;
+    padding: 20px; border-radius: 14px; margin-bottom: 22px;
     border-left: 5px solid #F59E0B;
   }
   
   .timer { 
-    position: sticky; 
-    top: 10px; 
+    position: sticky; top: 10px; 
     background: linear-gradient(135deg, #dc3545, #c82333); 
-    color: #fff; 
-    padding: 14px; 
-    border-radius: 12px; 
-    text-align: center; 
-    font-weight: 700; 
-    font-size: 22px; 
-    margin-bottom: 15px; 
-    z-index: 100;
+    color: #fff; padding: 14px; border-radius: 12px; 
+    text-align: center; font-weight: 700; font-size: 22px; 
+    margin-bottom: 15px; z-index: 100;
     box-shadow: 0 6px 20px rgba(220,53,69,0.5);
     animation: timerPulse 1.5s infinite;
   }
@@ -503,26 +495,12 @@
   }
   
   .match-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-  .match-col { 
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 15px; 
-    border-radius: 12px;
-  }
-  .match-item { 
-    padding: 10px; 
-    background: #fff; 
-    border: 1px solid #ddd; 
-    border-radius: 8px; 
-    margin-bottom: 8px;
-  }
+  .match-col { background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px; border-radius: 12px; }
+  .match-item { padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; }
   
   .checkbox-label { 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    padding: 10px; 
-    cursor: pointer;
-    border-radius: 8px;
+    display: flex; align-items: center; gap: 8px; 
+    padding: 10px; cursor: pointer; border-radius: 8px;
     transition: all 0.3s;
   }
   .checkbox-label:hover { 
@@ -542,14 +520,11 @@
   .result-summary { 
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-    gap: 18px; 
-    margin-bottom: 22px; 
+    gap: 18px; margin-bottom: 22px; 
   }
   .result-card { 
     background: linear-gradient(135deg, #FF6B35, #EC4899); 
-    color: #fff; 
-    padding: 24px; 
-    border-radius: 18px; 
+    color: #fff; padding: 24px; border-radius: 18px; 
     text-align: center;
     box-shadow: 0 10px 30px rgba(255,107,53,0.4);
     transition: all 0.4s;
@@ -560,37 +535,26 @@
     60% { transform: scale(1.1); }
     100% { opacity: 1; transform: scale(1); }
   }
-  .result-card:hover {
-    transform: translateY(-8px) rotate(2deg);
-    box-shadow: 0 15px 40px rgba(255,107,53,0.6);
-  }
-  .result-card:nth-child(2) { background: linear-gradient(135deg, #1E3A8A, #3B82F6); box-shadow: 0 10px 30px rgba(30,58,138,0.4); }
-  .result-card:nth-child(3) { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; box-shadow: 0 10px 30px rgba(251,191,36,0.4); }
-  .result-card:nth-child(4) { background: linear-gradient(135deg, #EC4899, #BE185D); box-shadow: 0 10px 30px rgba(236,72,153,0.4); }
-  .result-card:nth-child(5) { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 10px 30px rgba(16,185,129,0.4); }
+  .result-card:hover { transform: translateY(-8px) rotate(2deg); }
+  .result-card:nth-child(2) { background: linear-gradient(135deg, #1E3A8A, #3B82F6); }
+  .result-card:nth-child(3) { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; }
+  .result-card:nth-child(4) { background: linear-gradient(135deg, #EC4899, #BE185D); }
+  .result-card:nth-child(5) { background: linear-gradient(135deg, #10B981, #059669); }
   
   .result-card .num { font-size: 40px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
   .result-card .lbl { font-size: 13px; opacity: 0.95; margin-top: 5px; font-weight: 600; }
   
   .hidden { display: none !important; }
   .spinner { 
-    border: 3px solid #f3f3f3; 
-    border-top: 3px solid #FF6B35; 
-    border-radius: 50%; 
-    width: 30px; 
-    height: 30px; 
-    animation: spin 1s linear infinite; 
-    margin: 0 auto 10px; 
+    border: 3px solid #f3f3f3; border-top: 3px solid #FF6B35; 
+    border-radius: 50%; width: 30px; height: 30px; 
+    animation: spin 1s linear infinite; margin: 0 auto 10px; 
   }
   
   .live-indicator { 
-    display: inline-block; 
-    width: 12px; 
-    height: 12px; 
-    background: #10B981; 
-    border-radius: 50%; 
-    margin-right: 5px; 
-    animation: pulseDot 1.5s infinite;
+    display: inline-block; width: 12px; height: 12px; 
+    background: #10B981; border-radius: 50%; 
+    margin-right: 5px; animation: pulseDot 1.5s infinite;
   }
   @keyframes pulseDot { 
     0%, 100% { opacity: 1; transform: scale(1); } 
@@ -599,63 +563,35 @@
   
   .sync-badge { 
     background: linear-gradient(135deg, #10B981, #059669); 
-    color: #fff; 
-    padding: 5px 14px; 
-    border-radius: 20px; 
-    font-size: 11px; 
-    font-weight: 700;
+    color: #fff; padding: 5px 14px; border-radius: 20px; 
+    font-size: 11px; font-weight: 700;
     box-shadow: 0 3px 10px rgba(16,185,129,0.4);
   }
-  .sync-badge.syncing { 
-    background: linear-gradient(135deg, #FBBF24, #F59E0B); 
-    color: #333;
-  }
+  .sync-badge.syncing { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #333; }
   
-  /* FLOATING BUTTON */
   .floating-add-btn {
-    position: fixed; 
-    bottom: 30px; 
-    right: 30px;
+    position: fixed; bottom: 110px; right: 30px;
     background: linear-gradient(135deg, #FF6B35, #EC4899);
     background-size: 200% 200%;
     animation: gradientBG 3s ease infinite;
-    color: #fff; 
-    border: none; 
-    border-radius: 50px;
-    padding: 18px 30px; 
-    font-size: 16px; 
-    font-weight: 700;
-    cursor: pointer; 
-    box-shadow: 0 10px 35px rgba(255,107,53,0.6);
-    z-index: 1000; 
-    transition: all 0.3s;
-    display: flex; 
-    align-items: center; 
-    gap: 8px;
+    color: #fff; border: none; border-radius: 50px;
+    padding: 18px 30px; font-size: 16px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 10px 35px rgba(255,107,53,0.6);
+    z-index: 999; transition: all 0.3s;
+    display: flex; align-items: center; gap: 8px;
   }
-  .floating-add-btn:hover { 
-    transform: translateY(-5px) scale(1.05); 
-    box-shadow: 0 15px 45px rgba(255,107,53,0.8);
-  }
-  .floating-add-btn:active {
-    transform: translateY(-2px) scale(1);
-  }
+  .floating-add-btn:hover { transform: translateY(-5px) scale(1.05); }
   
   .upload-progress {
     background: linear-gradient(135deg, #DBEAFE, #BFDBFE); 
-    border: 2px solid #3B82F6;
-    border-radius: 12px; 
-    padding: 12px; 
-    margin-top: 10px; 
-    font-size: 13px;
+    border: 2px solid #3B82F6; border-radius: 12px; 
+    padding: 12px; margin-top: 10px; font-size: 13px;
   }
   .progress-bar {
     background: linear-gradient(90deg, #FF6B35, #EC4899); 
     background-size: 200% 100%;
     animation: progressShimmer 2s ease infinite;
-    height: 12px; 
-    border-radius: 6px;
-    margin-top: 8px; 
+    height: 12px; border-radius: 6px; margin-top: 8px; 
     transition: width 0.3s;
   }
   @keyframes progressShimmer {
@@ -665,111 +601,73 @@
   
   .img-size-info {
     background: linear-gradient(135deg, #D1FAE5, #A7F3D0); 
-    border: 1px solid #10B981;
-    color: #065F46; 
-    padding: 8px 12px; 
-    border-radius: 8px;
-    font-size: 12px; 
-    margin-top: 5px;
+    border: 1px solid #10B981; color: #065F46; 
+    padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-top: 5px;
   }
   
-  /* ZOOM MODAL */
   .zoom-modal {
-    position: fixed;
-    top: 0; left: 0;
+    position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.92);
     z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     cursor: zoom-out;
     animation: zoomFadeIn 0.3s ease;
   }
-  @keyframes zoomFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+  @keyframes zoomFadeIn { from { opacity: 0; } to { opacity: 1; } }
   .zoom-modal img {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 90%; max-height: 90%;
     border-radius: 12px;
     box-shadow: 0 15px 60px rgba(0,0,0,0.7);
-    transition: transform 0.3s;
-    cursor: grab;
+    transition: transform 0.3s; cursor: grab;
   }
   .zoom-modal img:active { cursor: grabbing; }
   .zoom-controls {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
+    position: fixed; bottom: 30px; left: 50%;
     transform: translateX(-50%);
     background: rgba(255,255,255,0.97);
-    padding: 14px 22px;
-    border-radius: 50px;
-    display: flex;
-    gap: 12px;
+    padding: 14px 22px; border-radius: 50px;
+    display: flex; gap: 12px;
     box-shadow: 0 6px 25px rgba(0,0,0,0.4);
     z-index: 10000;
   }
   .zoom-btn {
-    width: 45px; height: 45px;
-    border-radius: 50%;
+    width: 45px; height: 45px; border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, #FF6B35, #EC4899);
-    color: #fff;
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
+    color: #fff; font-size: 22px; font-weight: bold;
+    cursor: pointer; transition: all 0.3s;
   }
-  .zoom-btn:hover {
-    transform: scale(1.15) rotate(10deg);
-  }
+  .zoom-btn:hover { transform: scale(1.15) rotate(10deg); }
   .zoom-close {
-    position: fixed;
-    top: 20px; right: 20px;
-    width: 55px; height: 55px;
-    border-radius: 50%;
+    position: fixed; top: 20px; right: 20px;
+    width: 55px; height: 55px; border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, #dc3545, #c82333);
-    color: #fff;
-    font-size: 26px;
-    cursor: pointer;
+    color: #fff; font-size: 26px; cursor: pointer;
     z-index: 10001;
     box-shadow: 0 6px 20px rgba(220,53,69,0.6);
     transition: all 0.3s;
   }
-  .zoom-close:hover {
-    transform: rotate(90deg) scale(1.1);
-  }
+  .zoom-close:hover { transform: rotate(90deg) scale(1.1); }
   .zoom-hint {
-    position: fixed;
-    top: 20px; left: 50%;
+    position: fixed; top: 20px; left: 50%;
     transform: translateX(-50%);
     background: rgba(255,255,255,0.97);
-    padding: 12px 22px;
-    border-radius: 30px;
-    font-size: 13px;
-    color: #1E3A8A;
-    font-weight: 600;
+    padding: 12px 22px; border-radius: 30px;
+    font-size: 13px; color: #1E3A8A; font-weight: 600;
     z-index: 10001;
     box-shadow: 0 6px 20px rgba(0,0,0,0.3);
   }
   
-  /* LOADING OVERLAY */
   .loading-overlay {
-    position: fixed;
-    top: 0; left: 0;
+    position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.75);
     backdrop-filter: blur(8px);
     z-index: 9998;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 22px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 22px;
     animation: fadeIn 0.3s ease;
   }
   .loading-overlay .spinner-big {
@@ -780,35 +678,105 @@
     animation: spin 1s linear infinite;
   }
   .loading-overlay .loading-text {
-    color: #fff;
-    font-size: 20px;
-    font-weight: 600;
+    color: #fff; font-size: 20px; font-weight: 600;
   }
   
   .logo-preview {
-    max-width: 150px;
-    max-height: 80px;
-    border-radius: 12px;
-    margin-top: 10px;
+    max-width: 150px; max-height: 80px;
+    border-radius: 12px; margin-top: 10px;
     border: 2px solid #e0e0e0;
   }
   
-  /* ACTION BUTTONS GROUP */
-  .action-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 10px;
+  .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .action-buttons .btn { padding: 6px 12px; font-size: 12px; }
+  
+  .import-zone {
+    border: 3px dashed #FF6B35;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+    transition: all 0.3s;
+    cursor: pointer;
   }
-  .action-buttons .btn {
-    padding: 6px 12px;
-    font-size: 12px;
+  .import-zone:hover {
+    border-color: #EC4899;
+    background: linear-gradient(135deg, #FDF2F8, #FCE7F3);
+    transform: translateY(-2px);
+  }
+  .import-zone.dragover {
+    border-color: #10B981;
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+  }
+  .import-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+    animation: bounce 2s ease infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .import-preview {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+  }
+  .import-preview-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+  }
+  .import-preview-item:last-child { border-bottom: none; }
+  
+  .format-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  .format-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .format-tab:hover {
+    border-color: #FF6B35;
+    transform: translateY(-2px);
+  }
+  .format-tab.active {
+    border-color: #FF6B35;
+    background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+    box-shadow: 0 4px 12px rgba(255,107,53,0.2);
+  }
+  .format-tab .format-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  .format-tab .format-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1E3A8A;
+  }
+  .format-tab .format-desc {
+    font-size: 11px;
+    color: #666;
+    margin-top: 3px;
   }
 </style>
 </head>
 <body>
 
-<!-- PARTICLES CONTAINER -->
 <div id="particles"></div>
 
 <div class="container">
@@ -822,14 +790,6 @@
   <div id="firebaseStatus" class="firebase-status">🔄 Menghubungkan ke Firebase...</div>
 
   <div id="teacherMode">
-    <div class="tabs">
-      <button class="tab active" onclick="showSection('dashboard', this)">🏠 Dashboard</button>
-      <button class="tab" onclick="showSection('create', this)">➕ Buat Kuis</button>
-      <button class="tab" onclick="showSection('list', this)">📋 Daftar Kuis</button>
-      <button class="tab" onclick="showSection('results', this)">📊 Hasil Siswa</button>
-      <button class="tab" onclick="showSection('settings', this)">⚙️ Pengaturan</button>
-    </div>
-
     <div class="content">
       <div id="dashboard" class="section active">
         <h2>🏠 Dashboard Guru <span class="sync-badge" id="syncBadge">🔴 Offline</span></h2>
@@ -844,14 +804,15 @@
           • Data kuis & hasil siswa: <b>Firebase Firestore</b> (Real-time)<br>
           • Upload gambar soal: <b>Cloudinary</b> (25GB gratis, CDN global)<br>
           • Export soal ke <b>Microsoft Word (DOCX)</b> untuk dicetak<br>
+          • Import soal dari <b>Excel, CSV, atau JSON</b><br>
           • Hasil siswa otomatis masuk dashboard guru dari device manapun!
         </div>
         <div class="alert alert-info">
           <strong>📌 Panduan Cepat:</strong><br>
-          1. Tab <b>Pengaturan</b> → upload logo sekolah & isi API keys (opsional)<br>
-          2. Tab <b>Buat Kuis</b> → buat kuis + upload gambar (otomatis ke Cloudinary)<br>
-          3. Tab <b>Daftar Kuis</b> → salin link, export DOCX, & share ke siswa<br>
-          4. Tab <b>Hasil Siswa</b> → lihat hasil real-time + export Excel
+          1. Menu <b>⚙️ Pengaturan</b> → upload logo sekolah & isi API keys<br>
+          2. Menu <b>➕ Buat Kuis</b> → buat/import kuis + upload gambar<br>
+          3. Menu <b>📋 Daftar Kuis</b> → salin link, export DOCX, share ke siswa<br>
+          4. Menu <b>📊 Hasil Siswa</b> → lihat hasil real-time + export Excel
         </div>
       </div>
 
@@ -886,6 +847,58 @@
             <label class="checkbox-label">
               <input type="checkbox" id="quizShuffle"> Acak urutan soal untuk setiap siswa
             </label>
+          </div>
+        </div>
+
+        <!-- IMPORT SOAL SECTION -->
+        <div class="quiz-card" style="background: linear-gradient(135deg, #FDF2F8, #FCE7F3);">
+          <h3>📥 Import Soal dari File</h3>
+          <div class="alert alert-info">
+            <strong>Format yang didukung:</strong><br>
+            • <b>Excel (.xlsx, .xls)</b> - Edit di Microsoft Excel, LibreOffice, Google Sheets<br>
+            • <b>CSV (.csv)</b> - Format teks sederhana, bisa dibuka di Excel<br>
+            • <b>JSON (.json)</b> - Backup dari aplikasi ini<br>
+            • Soal akan <b>ditambahkan</b> ke daftar soal yang sudah ada
+          </div>
+          
+          <!-- Format Tabs -->
+          <div class="format-tabs">
+            <div class="format-tab active" onclick="switchImportFormat('excel')">
+              <div class="format-icon">📊</div>
+              <div class="format-name">Excel</div>
+              <div class="format-desc">.xlsx, .xls</div>
+            </div>
+            <div class="format-tab" onclick="switchImportFormat('csv')">
+              <div class="format-icon">📄</div>
+              <div class="format-name">CSV</div>
+              <div class="format-desc">.csv</div>
+            </div>
+            <div class="format-tab" onclick="switchImportFormat('json')">
+              <div class="format-icon">📋</div>
+              <div class="format-name">JSON</div>
+              <div class="format-desc">.json</div>
+            </div>
+          </div>
+          
+          <div class="import-zone" id="importZone" onclick="document.getElementById('importQuestionsFile').click()">
+            <div class="import-icon">📂</div>
+            <h4 style="color:#1E3A8A;margin-bottom:8px;">Klik atau Drag & Drop File di Sini</h4>
+            <p style="color:#666;font-size:13px;" id="importFormatHint">Format: Excel (.xlsx, .xls) atau CSV (.csv)</p>
+            <input type="file" id="importQuestionsFile" accept=".xlsx,.xls,.csv,.json" style="display:none" onchange="handleImportQuestions(event)">
+          </div>
+          
+          <div style="margin-top:15px;">
+            <button class="btn btn-info" onclick="downloadTemplate()" style="width:100%;">
+              📥 Download Template Excel/CSV (Contoh Format)
+            </button>
+          </div>
+          
+          <div id="importPreview" class="hidden">
+            <div class="import-preview" id="importPreviewContent"></div>
+            <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-success" onclick="confirmImportQuestions()">✅ Tambahkan Soal yang Diimport</button>
+              <button class="btn btn-danger" onclick="cancelImportQuestions()">❌ Batal</button>
+            </div>
           </div>
         </div>
 
@@ -926,7 +939,7 @@
         </div>
 
         <div class="quiz-card">
-          <h3>📋 Daftar Soal</h3>
+          <h3>📋 Daftar Soal <span id="questionCount" style="color:#FF6B35;font-size:14px;">(0 soal)</span></h3>
           <div id="questionsList"></div>
         </div>
 
@@ -957,9 +970,7 @@
         
         <div class="quiz-card">
           <h3>🏫 Logo Sekolah</h3>
-          <div class="alert alert-info">
-            Upload logo sekolah Anda. Logo akan muncul di header aplikasi dan halaman kuis siswa.
-          </div>
+          <div class="alert alert-info">Upload logo sekolah Anda. Logo akan muncul di header aplikasi dan halaman kuis siswa.</div>
           <div class="form-group">
             <label>Upload Logo (JPG/PNG, maks 500KB):</label>
             <input type="file" id="logoUpload" accept="image/*" onchange="handleLogoUpload(event)">
@@ -1041,6 +1052,32 @@
     </div>
   </div>
 </div>
+
+<!-- BOTTOM FLOATING NAVIGATION -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" onclick="showSection('dashboard', this)" data-section="dashboard">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Dashboard</span>
+  </button>
+  <button class="nav-item" onclick="showSection('create', this)" data-section="create">
+    <span class="nav-icon">➕</span>
+    <span class="nav-label">Buat Kuis</span>
+  </button>
+  <button class="nav-item" onclick="showSection('list', this)" data-section="list">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Daftar</span>
+    <span class="nav-badge hidden" id="quizCountBadge">0</span>
+  </button>
+  <button class="nav-item" onclick="showSection('results', this)" data-section="results">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Hasil</span>
+    <span class="nav-badge hidden" id="resultCountBadge">0</span>
+  </button>
+  <button class="nav-item" onclick="showSection('settings', this)" data-section="settings">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">Setting</span>
+  </button>
+</nav>
 
 <button class="floating-add-btn hidden" id="floatingAddBtn" onclick="addQuestion()">
   ➕ Tambah Soal
