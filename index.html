@@ -190,8 +190,8 @@
           <div class="result-card"><div class="num" id="totalQuestion">0</div><div class="lbl">Total Soal</div></div>
           <div class="result-card"><div class="num" id="avgScore">0</div><div class="lbl">Rata-rata Nilai</div></div>
         </div>
-        <div class="alert alert-success"><strong>✅ Sistem Aktif!</strong><br>• Data kuis & hasil siswa: <b>Firebase Firestore</b> (Real-time)<br>• Upload gambar soal: <b>Cloudinary</b> (25GB gratis, CDN global)<br>• Export soal ke <b>Microsoft Word (DOCX)</b> untuk dicetak<br>• Import soal dari file JSON<br>• Hasil siswa otomatis masuk dashboard guru dari device manapun!</div>
-        <div class="alert alert-info"><strong>📌 Panduan Cepat:</strong><br>1. Menu <b>⚙️ Setting</b> → upload logo sekolah & isi API keys<br>2. Menu <b>➕ Buat Kuis</b> → buat/import kuis + upload gambar<br>3. Menu <b>📋 Daftar</b> → salin link, export DOCX, share ke siswa<br>4. Menu <b>📊 Hasil</b> → lihat hasil real-time + export Excel</div>
+        <div class="alert alert-success"><strong>✅ Sistem Aktif!</strong><br>• Data kuis & hasil siswa: <b>Firebase Firestore</b> (Real-time)<br>• Upload gambar soal: <b>Cloudinary</b> (25GB gratis, CDN global)<br>• Export soal ke <b>Microsoft Word (DOCX)</b> untuk dicetak<br>• Import soal dari <b>Excel/CSV/JSON</b><br>• Hasil siswa otomatis masuk dashboard guru dari device manapun!</div>
+        <div class="alert alert-info"><strong>📌 Panduan Cepat:</strong><br>1. Menu <b>⚙️ Setting</b> → upload logo sekolah & isi API keys<br>2. Menu <b>➕ Buat Kuis</b> → buat/import kuis + upload gambar<br>3. Menu <b>📋 Daftar</b> → salin link, export DOCX, share ke siswa<br>4. Menu <b>📊 Hasil</b> → lihat hasil real-time + export Excel + <b>Nilai Esai Manual</b></div>
       </div>
 
       <div id="create" class="section">
@@ -210,12 +210,15 @@
 
         <div class="quiz-card" style="background: linear-gradient(135deg, #FDF2F8, #FCE7F3);">
           <h3>📥 Import Soal dari File</h3>
-          <div class="alert alert-info"><strong>Format yang didukung:</strong><br>• File <b>JSON</b> backup dari aplikasi ini<br>• File <b>JSON</b> berisi array soal langsung<br>• Soal akan <b>ditambahkan</b> ke daftar soal yang sudah ada</div>
+          <div class="alert alert-info"><strong>Format yang didukung:</strong><br>• File <b>Excel (.xlsx, .xls)</b> atau <b>CSV (.csv)</b><br>• File <b>JSON</b> backup dari aplikasi ini<br>• Soal akan <b>ditambahkan</b> ke daftar soal yang sudah ada</div>
           <div class="import-zone" id="importZone" onclick="document.getElementById('importQuestionsFile').click()">
             <div class="import-icon">📂</div>
-            <h4 style="color:#1E3A8A;margin-bottom:8px;">Klik atau Drag & Drop File JSON di Sini</h4>
-            <p style="color:#666;font-size:13px;">Format: .json (backup aplikasi atau array soal)</p>
-            <input type="file" id="importQuestionsFile" accept=".json" style="display:none" onchange="handleImportQuestions(event)">
+            <h4 style="color:#1E3A8A;margin-bottom:8px;">Klik atau Drag & Drop File di Sini</h4>
+            <p style="color:#666;font-size:13px;" id="importFormatHint">Format: .xlsx, .xls, .csv, atau .json</p>
+            <input type="file" id="importQuestionsFile" accept=".xlsx,.xls,.csv,.json" style="display:none" onchange="handleImportQuestions(event)">
+          </div>
+          <div style="margin-top:15px;">
+            <button class="btn btn-info" onclick="downloadTemplate()" style="width:100%;">📥 Download Template Excel/CSV (Contoh Format)</button>
           </div>
           <div id="importPreview" class="hidden">
             <div class="import-preview" id="importPreviewContent"></div>
@@ -420,7 +423,7 @@ function setupNavigation() {
   console.log('✅ Navigation setup done');
 }
 
-// ==================== SYNC BADGES (FIXED) ====================
+// ==================== SYNC BADGES ====================
 function updateSyncBadges(online) {
   const badges = document.querySelectorAll('.sync-badge');
   badges.forEach(b => {
@@ -468,7 +471,6 @@ function setupFirebaseListeners() {
         statusEl.textContent = '✅ Terhubung ke Firebase | Cloudinary: rbxpbias';
         statusEl.classList.remove('offline');
       }
-      // FIX: Update badge di Dashboard
       updateSyncBadges(true);
       console.log('✅ Firebase connected, quizzes:', state.quizzes.length);
     }, error => {
@@ -599,7 +601,7 @@ function applySchoolLogo() {
   }
 }
 
-// ==================== LOGO ====================
+// ==================== LOGO & LOADING ====================
 function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -627,7 +629,6 @@ function removeLogo() {
   }
 }
 
-// ==================== LOADING ====================
 function showLoading(text = 'Memproses...') { 
   const el = document.getElementById('loadingText');
   if (el) el.textContent = text;
@@ -735,34 +736,155 @@ function updateMatch(qIdx, pIdx, side, value) { state.currentQuestions[qIdx].mat
 function addMatchPair(qIdx) { state.currentQuestions[qIdx].matchPairs.push({left: '', right: ''}); renderQuestions(); }
 function removeMatchPair(qIdx, pIdx) { if (state.currentQuestions[qIdx].matchPairs.length <= 2) { alert('Minimal 2 pasangan!'); return; } state.currentQuestions[qIdx].matchPairs.splice(pIdx, 1); renderQuestions(); }
 
-// ==================== IMPORT ====================
+// ==================== IMPORT (EXCEL/CSV/JSON) ====================
 function setupDragDropImport() {
   const zone = document.getElementById('importZone');
   if (!zone) return;
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
   zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('dragover'); });
-  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); const file = e.dataTransfer.files[0]; if (file && file.name.endsWith('.json')) processImportFile(file); else alert('⚠️ Hanya file JSON!'); });
+  zone.addEventListener('drop', e => { 
+    e.preventDefault(); 
+    zone.classList.remove('dragover'); 
+    const file = e.dataTransfer.files[0]; 
+    if (file) processImportFile(file);
+    else alert('⚠️ File tidak valid!');
+  });
 }
 
-function handleImportQuestions(event) { const file = event.target.files[0]; if (!file) return; processImportFile(file); event.target.value = ''; }
+function handleImportQuestions(event) { 
+  const file = event.target.files[0]; 
+  if (!file) return; 
+  processImportFile(file); 
+  event.target.value = ''; 
+}
 
 function processImportFile(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      let questions = [];
-      if (Array.isArray(data)) questions = data;
-      else if (data.questions && Array.isArray(data.questions)) questions = data.questions;
-      else if (data.title && data.questions) questions = data.questions;
-      else throw new Error('Format tidak dikenali.');
-      const validQuestions = questions.filter(q => q.type && ['pg', 'bs', 'esai', 'match', 'multi'].includes(q.type) && q.text && q.text.trim());
-      if (validQuestions.length === 0) throw new Error('Tidak ada soal valid.');
-      state.pendingImportQuestions = validQuestions.map(q => ({ ...q, id: 'q_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), weight: q.weight || 10 }));
-      showImportPreview(state.pendingImportQuestions);
-    } catch (err) { alert('❌ Gagal: ' + err.message); }
-  };
-  reader.readAsText(file);
+  const fileName = file.name.toLowerCase();
+  const extension = fileName.split('.').pop();
+
+  if (['xlsx', 'xls', 'csv'].includes(extension)) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+
+        if (jsonData.length < 2) throw new Error('File Excel kosong atau hanya ada header.');
+
+        const rows = jsonData.slice(1);
+        const questions = [];
+
+        rows.forEach((row, idx) => {
+          if (!row || row.length === 0) return;
+          const type = (row[0] || '').toString().trim().toLowerCase();
+          const text = (row[1] || '').toString().trim();
+          if (!type || !text) return;
+
+          const validTypes = ['pg', 'bs', 'esai', 'multi', 'pilihan ganda', 'benar salah', 'benar/salah', 'jawaban lebih dari satu'];
+          if (!validTypes.includes(type)) return;
+
+          let normalizedType = type;
+          if (type === 'pilihan ganda') normalizedType = 'pg';
+          else if (type === 'benar salah' || type === 'benar/salah') normalizedType = 'bs';
+          else if (type === 'jawaban lebih dari satu') normalizedType = 'multi';
+
+          const optionA = (row[2] || '').toString().trim();
+          const optionB = (row[3] || '').toString().trim();
+          const optionC = (row[4] || '').toString().trim();
+          const optionD = (row[5] || '').toString().trim();
+          const correctAnswer = (row[6] || '').toString().trim();
+          const weight = parseInt(row[7]) || 10;
+
+          const question = {
+            id: 'q_import_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).substr(2, 5),
+            type: normalizedType, text: text, weight: weight, image: ''
+          };
+
+          if (normalizedType === 'pg') {
+            const correctLetter = correctAnswer.toUpperCase();
+            question.options = [
+              {text: optionA, correct: correctLetter === 'A'},
+              {text: optionB, correct: correctLetter === 'B'},
+              {text: optionC, correct: correctLetter === 'C'},
+              {text: optionD, correct: correctLetter === 'D'}
+            ].filter(o => o.text);
+          } else if (normalizedType === 'bs') {
+            question.correctBool = correctAnswer.toLowerCase() === 'benar';
+          } else if (normalizedType === 'esai') {
+            question.essayAnswer = correctAnswer;
+          } else if (normalizedType === 'multi') {
+            const correctLetters = correctAnswer.toUpperCase().split(',').map(l => l.trim());
+            question.options = [
+              {text: optionA, correct: correctLetters.includes('A')},
+              {text: optionB, correct: correctLetters.includes('B')},
+              {text: optionC, correct: correctLetters.includes('C')},
+              {text: optionD, correct: correctLetters.includes('D')}
+            ].filter(o => o.text);
+          }
+          questions.push(question);
+        });
+
+        if (questions.length === 0) throw new Error('Tidak ada soal valid. Pastikan format sesuai template.');
+        state.pendingImportQuestions = questions;
+        showImportPreview(questions);
+      } catch (err) {
+        alert('❌ Gagal memproses file Excel/CSV: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    // JSON Import
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        let questions = [];
+        if (Array.isArray(data)) questions = data;
+        else if (data.questions && Array.isArray(data.questions)) questions = data.questions;
+        else if (data.title && data.questions) questions = data.questions;
+        else throw new Error('Format tidak dikenali.');
+        
+        const validQuestions = questions.filter(q => q.type && ['pg', 'bs', 'esai', 'match', 'multi'].includes(q.type) && q.text && q.text.trim());
+        if (validQuestions.length === 0) throw new Error('Tidak ada soal valid.');
+        
+        state.pendingImportQuestions = validQuestions.map(q => ({ ...q, id: 'q_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), weight: q.weight || 10 }));
+        showImportPreview(state.pendingImportQuestions);
+      } catch (err) { alert('❌ Gagal: ' + err.message); }
+    };
+    reader.readAsText(file);
+  }
+}
+
+function downloadTemplate() {
+  const templateData = [
+    ['Jenis Soal', 'Pertanyaan', 'Opsi A', 'Opsi B', 'Opsi C', 'Opsi D', 'Jawaban Benar', 'Bobot Nilai'],
+    ['pg', 'Berapa hasil 2 + 2?', '3', '4', '5', '6', 'B', '10'],
+    ['pg', 'Ibu kota Indonesia adalah?', 'Bandung', 'Jakarta', 'Surabaya', 'Medan', 'B', '10'],
+    ['bs', 'Bumi berbentuk datar', '', '', '', '', 'Salah', '5'],
+    ['esai', 'Jelaskan proses fotosintesis!', '', '', '', '', 'Proses tumbuhan membuat makanan', '15'],
+    ['multi', 'Manakah yang termasuk buah? (pilih semua)', 'Apel', 'Wortel', 'Pisang', 'Kentang', 'A,C', '10']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(templateData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Template Soal');
+  
+  const guideData = [
+    ['PANDUAN FORMAT IMPORT SOAL'], [''],
+    ['KOLOM A - Jenis Soal: pg, bs, esai, atau multi'],
+    ['KOLOM B - Pertanyaan: Tulis pertanyaan soal'],
+    ['KOLOM C-F - Opsi A, B, C, D: Kosongkan untuk BS/Esai'],
+    ['KOLOM G - Jawaban Benar: A/B/C/D (PG), Benar/Salah (BS), A,C (Multi)'],
+    ['KOLOM H - Bobot Nilai: Angka (default: 10)'],
+    [''], ['CARA PAKAI:'],
+    ['1. Download template ini'], ['2. Edit di Excel/Google Sheets'],
+    ['3. Simpan sebagai .xlsx atau .csv'], ['4. Import ke aplikasi kuis']
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(guideData);
+  XLSX.utils.book_append_sheet(wb, ws2, 'Panduan');
+  XLSX.writeFile(wb, 'Template_Import_Soal.xlsx');
+  alert('✅ Template Excel berhasil didownload!\n\nBuka file tersebut di Excel, edit soal Anda, lalu import kembali.');
 }
 
 function showImportPreview(questions) {
@@ -788,7 +910,7 @@ function confirmImportQuestions() {
 
 function cancelImportQuestions() { state.pendingImportQuestions = []; document.getElementById('importPreview').classList.add('hidden'); document.getElementById('importQuestionsFile').value = ''; }
 
-// ==================== CLOUDINARY ====================
+// ==================== CLOUDINARY & RENDER ====================
 async function handleImageUpload(event, qIdx) {
   const file = event.target.files[0];
   if (!file) return;
@@ -967,7 +1089,7 @@ function resetForm() {
   renderQuestions();
 }
 
-// ==================== QUIZ LIST ====================
+// ==================== QUIZ LIST & RESULTS ====================
 function renderQuizList() {
   const container = document.getElementById('quizListContainer');
   if (!container) return;
@@ -1013,7 +1135,6 @@ async function deleteQuiz(id) {
 function copyLink(link) { navigator.clipboard.writeText(link).then(() => alert('✅ Link tersalin!')).catch(() => { const ta = document.createElement('textarea'); ta.value = link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('✅ Link tersalin!'); }); }
 function shareWA(title, link) { const text = `Kuis/Ujian: ${decodeURIComponent(title)}\nKerjakan di: ${link}`; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'); }
 
-// ==================== RESULTS ====================
 function loadResultQuizOptions() {
   const select = document.getElementById('resultQuizSelect');
   if (!select) return;
@@ -1042,14 +1163,89 @@ function loadResults() {
   container.innerHTML = html;
 }
 
+// ==================== FITUR BARU: PENILAIAN MANUAL ESAI ====================
 function showDetail(result, quiz) {
   let html = `<h3>Detail: ${escapeHtml(result.studentName)} (${escapeHtml(result.studentNIS || '-')})</h3>`;
-  (result.answers || []).forEach((ans, i) => { const q = (quiz.questions || []).find(x => x.id === ans.questionId); if (!q) return; html += `<div class="question-item"><strong>Soal ${i+1} (${q.weight} poin):</strong> ${escapeHtml(q.text)}<br><small>Jawaban: <b>${escapeHtml(String(ans.answer))}</b> | Skor: <b>${ans.score}/${q.weight}</b></small></div>`; });
-  html += `<h3>Total: ${(result.score||0).toFixed(1)}</h3>`;
+  (result.answers || []).forEach((ans, i) => {
+    const q = (quiz.questions || []).find(x => x.id === ans.questionId);
+    if (!q) return;
+
+    html += `<div class="question-item"><strong>Soal ${i+1} (${q.weight} poin) [${getTypeName(q.type)}]:</strong> ${escapeHtml(q.text)}<br>`;
+    html += `<small>Jawaban: <b>${escapeHtml(String(ans.answer))}</b> | Skor: <b id="score_display_${ans.questionId}">${ans.score}/${q.weight}</b></small>`;
+
+    if (q.type === 'esai') {
+      html += `<div style="margin-top:10px; padding:10px; background:#FDF2F8; border-radius:8px; border:1px dashed #EC4899;">`;
+      html += `<strong style="color:#BE185D; font-size:13px;">✏️ Penilaian Manual:</strong><br>`;
+      html += `<div style="display:flex; gap:10px; align-items:center; margin-top:8px;">`;
+      html += `<input type="number" id="essay_input_${ans.questionId}" value="${ans.score || 0}" min="0" max="${q.weight}" step="0.5" style="width:70px; padding:6px; border:1px solid #ccc; border-radius:6px;">`;
+      html += `<span style="font-size:13px;">/ ${q.weight}</span>`;
+      html += `<button class="btn btn-success" style="padding:6px 12px; font-size:12px;" onclick="saveManualScore('${result.id}', '${ans.questionId}', ${q.weight}, '${quiz.id}')">💾 Simpan</button>`;
+      html += `</div>`;
+      if (q.essayAnswer) html += `<div style="margin-top:8px; font-size:12px; color:#666;"><strong>Pedoman:</strong> ${escapeHtml(q.essayAnswer)}</div>`;
+      html += `</div>`;
+    } else {
+      let correctAnswer = '';
+      if (q.type === 'pg') { const c = q.options.find(o => o.correct); correctAnswer = c ? String.fromCharCode(65 + q.options.indexOf(c)) : '-'; }
+      else if (q.type === 'multi') { correctAnswer = q.options.filter(o => o.correct).map(o => String.fromCharCode(65 + q.options.indexOf(o))).join(', '); }
+      else if (q.type === 'bs') { correctAnswer = q.correctBool ? 'Benar' : 'Salah'; }
+      else if (q.type === 'match') { correctAnswer = q.matchPairs.map(p => `${p.left} → ${p.right}`).join('; '); }
+      html += `<div style="margin-top:5px; font-size:12px; color:#065F46;"><strong>✅ Kunci:</strong> ${escapeHtml(correctAnswer)}</div>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `<h3 style="margin-top:20px; text-align:right;">Total Nilai: <span id="modal_total_score" style="color:#1E3A8A;">${(result.score||0).toFixed(1)}</span></h3>`;
   const modal = document.createElement('div');
+  modal.id = 'detailModal';
   modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;overflow:auto;padding:20px;';
-  modal.innerHTML = `<div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:20px;">${html}<button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()">Tutup</button></div>`;
+  modal.innerHTML = `<div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:20px;">${html}<button class="btn btn-secondary" style="margin-top:15px;" onclick="document.getElementById('detailModal').remove()">Tutup</button></div>`;
   document.body.appendChild(modal);
+}
+
+async function saveManualScore(resultId, questionId, maxScore, quizId) {
+  const inputEl = document.getElementById(`essay_input_${questionId}`);
+  if (!inputEl) { alert('❌ Input nilai tidak ditemukan!'); return; }
+
+  const newScore = parseFloat(inputEl.value);
+  if (isNaN(newScore) || newScore < 0) { alert('⚠️ Nilai harus angka valid (minimal 0)!'); return; }
+  if (newScore > maxScore) { alert(`⚠️ Nilai tidak boleh lebih dari bobot soal (${maxScore})!`); return; }
+
+  const result = state.results.find(r => r.id === resultId);
+  if (!result) { alert('❌ Data hasil tidak ditemukan!'); return; }
+
+  const answer = result.answers.find(a => a.questionId === questionId);
+  if (!answer) return;
+
+  const oldScore = answer.score || 0;
+  answer.score = newScore;
+
+  const newRawScore = result.answers.reduce((sum, a) => sum + (a.score || 0), 0);
+  const newFinalScore = result.maxScore > 0 ? (newRawScore / result.maxScore) * 100 : 0;
+
+  result.rawScore = newRawScore;
+  result.score = newFinalScore;
+  result.manualGraded = true;
+  result.manualGradedAt = new Date().toISOString();
+
+  try {
+    if (!db) throw new Error('Firebase tidak terhubung.');
+    await db.collection('results').doc(resultId).update({
+      answers: result.answers,
+      rawScore: newRawScore,
+      score: newFinalScore,
+      manualGraded: true,
+      manualGradedAt: result.manualGradedAt
+    });
+
+    alert(`✅ Nilai berhasil disimpan!\nNilai baru: ${newScore}/${maxScore}\nTotal: ${newFinalScore.toFixed(1)}`);
+
+    document.getElementById(`score_display_${questionId}`).textContent = `${newScore}/${maxScore}`;
+    document.getElementById(`modal_total_score`).textContent = newFinalScore.toFixed(1);
+    updateDashboard();
+  } catch (err) {
+    alert('❌ Gagal menyimpan: ' + err.message);
+    answer.score = oldScore;
+  }
 }
 
 function exportExcel(quizId) {
